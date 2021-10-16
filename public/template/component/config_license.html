@@ -1,0 +1,58 @@
+<!--suppress JSUnresolvedVariable -->
+<div id="LicenseConfig" class="OneContainer">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">服务器 {{servername}} 证书(许可证)</div>
+        <div class="PanelBody">
+          <div class="col-sm-12 PanelItemF">
+            <div class="PanelItem" v-on:click="toBackServerConfig">
+              <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
+              返回到配置中心
+            </div>
+            <div class="PanelItem" v-on:click="toSave">
+              <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+              保存
+            </div>
+            <div class="PanelItem" v-on:click="re">
+              <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+              刷新
+            </div>
+          </div>
+          <textarea rows="30" style="width:100%;background:#2F3136" v-model="LicenseData"></textarea>
+          <br />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  MI.rListener("onload", function () {
+
+    // 定义页面地址
+    TOOLS.definePage("template/component/config_license", "config/license", SQSERVER.listenServername);
+
+    VIEW_MODEL.newVue("LicenseConfig", {
+      el: "#LicenseConfig",
+      methods: {
+        re: function () {
+          PAGE.refresh();
+        },
+        toBackServerConfig: function () {
+          RES.redirectPage("./template/component/config.html", "genuser/home", this.servername);
+        },
+        toSave: function () {
+          if (this.LicenseData.length>2000) return TOOLS.pushMsgWindow('✘ 错误：许可证内容不可超过 2000 字符！')
+          WS.sendMsg("config/license_save", JSON.stringify({
+            ServerName: SQSERVER.listenServername,
+            data: this.LicenseData
+          }));
+          PAGE.refresh();
+        }
+      }
+    });
+  });
+
+  MI.rListener("onend", function () {});
+</script>

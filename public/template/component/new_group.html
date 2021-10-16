@@ -1,0 +1,180 @@
+<div id="NewGroup" class="OneContainer">
+  <div class="col-md-12">
+    <div class="Panel PanelBlack">
+      <div class="PanelTitle">新建权限组</div>
+      <div class="PanelBody">
+        <div class="row">
+          <div class="col-md-12">
+            <br />
+
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="startvote" v-model="Groups"> 发起投票
+              </label>
+            </div>
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="changemap" v-model="Groups"> 更换/预设地图
+              </label>
+            </div>
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="pause" v-model="Groups"> 暂停游戏
+              </label>
+            </div>
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="cheat" v-model="Groups"> 使用作弊命令
+              </label>
+            </div>
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="private" v-model="Groups"> 设置服务器密码
+              </label>
+            </div>
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="balance" v-model="Groups"> 忽略服务器阵营平衡
+              </label>
+            </div>
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="chat" v-model="Groups"> 发送 管理员聊天频道 / 服务器黄字公告
+              </label>
+            </div>
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="kick" v-model="Groups"> 踢出玩家
+              </label>
+            </div>
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="ban" v-model="Groups"> 封禁玩家
+              </label>
+            </div>
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="config" v-model="Groups"> 更改服务器配置
+              </label>
+            </div>
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="cameraman" v-model="Groups"> 旁观者模式 (OP视角/上帝视角)
+              </label>
+            </div>
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="immune" v-model="Groups"> 无法被管理员 踢出/封禁
+              </label>
+            </div>
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="manageserver" v-model="Groups"> 关闭服务器
+              </label>
+            </div>
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="featuretest" v-model="Groups"> 测试命令 (自定义服务器 生成载具)
+              </label>
+            </div>
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="reserve" v-model="Groups"> 预留位 / 白名单
+              </label>
+            </div>
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="demos" v-model="Groups"> 录制演示
+              </label>
+            </div>
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="debug" v-model="Groups"> 调试
+              </label>
+            </div>
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="teamchange" v-model="Groups"> 忽略更换阵营时间限制
+              </label>
+            </div>
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="forceteamchange" v-model="Groups"> 允许执行强制更换阵营的命令
+              </label>
+            </div>
+            <div class="input-group">
+              <label>
+                <input type="checkbox" value="canseeadminchat" v-model="Groups"> 查看 管理员聊天/友军误伤/玩家加入退出 消息
+              </label>
+            </div>
+            <samp>{{Groups}}</samp>
+            <br />
+            <br />
+            <div class="input-group">
+              <span class="input-group-addon">权限组名称</span>
+              <input type="text" class="form-control" v-model="GroupName" placeholder="NewGroup" onKeyUp="value=value.replace(/[\W]/g,'')" v-bind:disabled="SQSERVER.website.EditGroup.Power" />
+            </div>
+
+
+          </div>
+        </div>
+        <div class="row">
+          <hr />
+          <div class="col-sm-12 PanelItemF">
+            <div class="PanelItem" v-on:click="toSave()">
+              <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+              新建/保存
+            </div>
+            <div class="PanelItem" v-on:click="toBack()">
+              <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
+              放弃并返回
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  MI.rListener("onload", function () {
+    let ServerName = SQSERVER.listenServername;
+    let AdminsData = SQSERVER.website.AdminsData;
+    new Vue({
+      el: "#NewGroup",
+      data: {
+        AD: AdminsData,
+        Groups: SQSERVER.website.EditGroup.Power || [],
+        GroupName: SQSERVER.website.EditGroup.Group || ''
+      },
+      methods: {
+        toBack: function () {
+          RES.redirectPage("./template/component/config_admins.html", "config/admins", ServerName);
+        },
+        toSave: function () {
+          if (this.Groups.length<1) {
+            TOOLS.pushMsgWindow('✘ 错误：请选择需要给予权限组的权限！');
+            return;
+          }
+          if (!this.GroupName) {
+            TOOLS.pushMsgWindow('✘ 错误：请输入 权限组名称！');
+            return;
+          }
+          let Temp = {};
+          Temp.Group = this.GroupName;
+          Temp.Power = this.Groups;
+          WS.sendMsg("config/admins_add_group", JSON.stringify({
+            data: Temp,
+            servername: ServerName
+          }));
+          this.toBack();
+        }
+      }
+    });
+  });
+
+  MI.rListener("onend", function () {
+    delete SQSERVER.website.EditGroup.Group;
+    delete SQSERVER.website.EditGroup.Power;
+  });
+</script>

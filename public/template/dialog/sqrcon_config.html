@@ -1,0 +1,65 @@
+<div id="SQRconContainer">
+  <p></p>
+  <!--
+  <div class="input-group input-group-sm">
+    <span class="input-group-addon">Rcon IP</span>
+    <input type="text" class="form-control" placeholder="选填，默认是 localhost (不推荐修改)" aria-describedby="sizing-addon3" v-model="SQRconHost" />
+  </div>
+  -->
+  <div class="input-group input-group-sm">
+    <span class="input-group-addon">Steam 查询端口</span>
+    <input v-bind:disabled="true" type="text" class="form-control" placeholder="" aria-describedby="sizing-addon3" v-model="SQPingPort" />
+  </div>
+  <div class="input-group input-group-sm">
+    <span class="input-group-addon">Rcon 端口</span>
+    <input type="text" class="form-control" placeholder="选填，不填写则随机" aria-describedby="sizing-addon3" v-model="SQRconPort" />
+  </div>
+  <div class="input-group input-group-sm">
+    <span class="input-group-addon">Rcon 密码</span>
+    <input type="text" class="form-control" placeholder="选填，不填写则随机" aria-describedby="sizing-addon3" v-model="SQRconPassword" />
+  </div>
+  <div class="input-group input-group-sm">
+    <span class="input-group-addon">SQBot 设置</span>
+    <input type="text" class="form-control" aria-describedby="sizing-addon3" v-model="QQBot" disabled>
+  </div>
+  <p style="color: rgb(230, 55, 55)">修改配置内容后，需要重启 战术小队 服务器。</p>
+  <br />
+  <button class="btn btn-success" v-on:click="ok()">保存配置</button>
+  &nbsp;|&nbsp;
+  <button class="btn btn-danger" v-on:click="TOOLS.popWindClose();">返回</button>
+</div>
+<style>
+  .form-control {
+    color: #555;
+    background-color: #fff;
+  }
+</style>
+<script>
+  WS.sendMsg("SQRcon/config", PAGE.listenServername, function (obj) {
+    var remoteSQRconConfig = obj.ResponseValue;
+    new Vue({
+      el: "#SQRconContainer",
+      data: {
+        SQPingPort: remoteSQRconConfig.SQPingPort || "读取错误，请关闭本窗口重试",
+        SQRconPort: remoteSQRconConfig.SQRconPort || "",
+        SQRconPassword: remoteSQRconConfig.SQRconPassword || "",
+        QQBot: `设置服务器 1 ${window.location.host}:${remoteSQRconConfig.SQPingPort}`
+      },
+      methods: {
+        ok: function () {
+          WS.sendMsg(
+            "SQRcon/config_save",
+            JSON.stringify({
+              SQRconServerName: PAGE.listenServername,
+              SQRconConfig: {
+                SQRconPort: this.SQRconPort || "",
+                SQRconPassword: this.SQRconPassword || ""
+              }
+            })
+          );
+          TOOLS.popWindClose();
+        }
+      }
+    });
+  });
+</script>

@@ -1,0 +1,50 @@
+<div id="EditAdminConfig">
+  <br />
+  <div class="input-group">
+    <span class="input-group-addon">SteamID64</span>
+    <input type="number" class="form-control" v-model="Admin.SteamID64" v-bind:disabled="Admin.Edit" oninput="if(value.length>17) value=value.slice(0,17)" />
+  </div>
+  <div class="input-group">
+    <span class="input-group-addon">权限组</span>
+    <select v-model="Admin.Group" class="form-control">
+      <option v-for="g in Groups" :value="g.Group" :key="g.Group">{{g.Group}}</option>
+    </select>
+  </div>
+  <div class="input-group">
+    <span class="input-group-addon">备注</span>
+    <input type="text" class="form-control" v-model="Admin.Msg" />
+  </div>
+  <p style="color:rgb(230, 55, 55);font-weight:bold">{{msg}}</p>
+  <p class="text-right"><a href="https://tieba.baidu.com/p/3626052832" target="_blank"><b>如何获取 SteamID64？</b></a></p>
+
+  <button class="btn btn-success" v-on:click="toSave">添加/保存</button>
+  &nbsp;|&nbsp;
+  <button class="btn btn-danger" v-on:click="TOOLS.popWindClose">关闭</button>
+
+</div>
+<script>
+  new Vue({
+    el: "#EditAdminConfig",
+    data: {
+      msg: '',
+      Admin: SQSERVER.website.EditAdmin || {SteamID64: '', Group: '', Msg: ''},
+      Groups: SQSERVER.website.Groups
+    },
+    methods: {
+      toSave: function () {
+        if (this.Admin.SteamID64.toString().length!==17) {
+          this.msg = '✘ 错误：请正确输入 17 位数的 SteamID64！';
+          return;
+        }else if (!this.Admin.Group) {
+          this.msg = '✘ 错误：请选择 权限组！';
+          return;
+        }
+        WS.sendMsg("config/admins_add", JSON.stringify({
+          data: this.Admin,
+          servername: SQSERVER.listenServername
+        }));
+        TOOLS.popWindClose();
+        PAGE.refresh();
+      }
+    }});
+</script>

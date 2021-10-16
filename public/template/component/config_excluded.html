@@ -1,0 +1,91 @@
+<!--suppress JSUnresolvedVariable -->
+<div id="ExcludedConfig" class="OneContainer">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">服务器 {{servername}} 屏蔽地图</div>
+        <div class="PanelBody">
+          <div class="col-sm-12 PanelItemF">
+            <div class="PanelItem" v-on:click="toBackServerConfig">
+              <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
+              返回到配置中心
+            </div>
+            <div class="PanelItem" v-on:click="toSave">
+              <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+              保存
+            </div>
+            <div class="PanelItem" v-on:click="re">
+              <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+              刷新
+            </div>
+          </div>
+          <br />
+          <br />
+        </div>
+      </div>
+
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">ExcludedLayers.cfg</div>
+        <div class="PanelBody">
+          <textarea class="textarea" rows="20" v-model="ExcludedData.Layers"></textarea>
+        </div>
+      </div>
+
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">ExcludedLevels.cfg</div>
+        <div class="PanelBody">
+          <textarea class="textarea" rows="30" v-model="ExcludedData.Levels"></textarea>
+        </div>
+      </div>
+
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">ExcludedFactions.cfg</div>
+        <div class="PanelBody">
+          <textarea class="textarea" rows="10" v-model="ExcludedData.Factions"></textarea>
+        </div>
+      </div>
+
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">ExcludedFactionSetups.cfg</div>
+        <div class="PanelBody">
+          <textarea class="textarea" rows="30" v-model="ExcludedData.FactionSetups"></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script>
+  MI.rListener("onload", function () {
+
+    // 定义页面地址
+    TOOLS.definePage("template/component/config_excluded", "config/excluded", SQSERVER.listenServername);
+
+    VIEW_MODEL.newVue("ExcludedConfig", {
+      el: "#ExcludedConfig",
+      methods: {
+        re: function () {
+          PAGE.refresh();
+        },
+        toBackServerConfig: function () {
+          RES.redirectPage("./template/component/config.html", "genuser/home", this.servername);
+        },
+        toSave: function () {
+          if (this.ExcludedData.Factions.length>100000 || this.ExcludedData.FactionSetups.length>100000 || this.ExcludedData.Layers.length>100000 || this.ExcludedData.Levels.length>100000) return TOOLS.pushMsgWindow('✘ 错误：[屏蔽地图] 内容不可超过 100000 字符！')
+          WS.sendMsg("config/excluded_save", JSON.stringify({
+            ServerName: SQSERVER.listenServername,
+            data: {
+              Factions: this.ExcludedData.Factions,
+              FactionSetups: this.ExcludedData.FactionSetups,
+              Layers: this.ExcludedData.Layers,
+              Levels: this.ExcludedData.Levels
+            }
+          }));
+          PAGE.refresh();
+        }
+      }
+    });
+  });
+
+  MI.rListener("onend", function () {});
+</script>

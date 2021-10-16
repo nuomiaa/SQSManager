@@ -1,0 +1,110 @@
+<!--suppress JSUnresolvedVariable -->
+<div id="MapsConfig" class="OneContainer">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">服务器 {{servername}} 地图池</div>
+        <div class="PanelBody">
+          <div class="col-sm-12 PanelItemF">
+            <div class="PanelItem" v-on:click="toBackServerConfig">
+              <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
+              返回到配置中心
+            </div>
+            <div class="PanelItem" v-on:click="Random">
+              <span class="glyphicon glyphicon-retweet" aria-hidden="true"></span>
+              打乱
+            </div>
+            <div class="PanelItem" v-on:click="toSave">
+              <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+              保存
+            </div>
+            <div class="PanelItem" v-on:click="re">
+              <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+              刷新
+            </div>
+          </div>
+          <br />
+          <br />
+        </div>
+      </div>
+
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">LayerRotation.cfg</div>
+        <div class="PanelBody">
+          <textarea class="textarea" rows="30" v-model="MapsData.Layer"></textarea>
+        </div>
+      </div>
+
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">LevelRotation.cfg</div>
+        <div class="PanelBody">
+          <textarea class="textarea" rows="30" v-model="MapsData.Level"></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<style>
+  .textarea {
+    width: 100%;
+    background: #2F3136;
+  }
+</style>
+<script>
+  MI.rListener("onload", function () {
+
+    // 定义页面地址
+    TOOLS.definePage("template/component/config_maps", "config/maps", SQSERVER.listenServername);
+
+    VIEW_MODEL.newVue("MapsConfig", {
+      el: "#MapsConfig",
+      methods: {
+        re: function () {
+          PAGE.refresh();
+        },
+        toBackServerConfig: function () {
+          RES.redirectPage("./template/component/config.html", "genuser/home", this.servername);
+        },
+        toSave: function () {
+          if (this.MapsData.Layer.length>100000 || this.MapsData.Level.length>100000) return TOOLS.pushMsgWindow('✘ 错误：[地图池] 内容不可超过 100000 字符！')
+          let Data = this.MapsData.Layer.replace(/ /gim, '_').split('\n');
+          let Maps = this.getMaps();
+          let error = [];
+          let success = [];
+          let MapsData = {Layer:'', Level:''};
+          for (let i in Data) {
+            if (!Data[i] || Data[i].indexOf('#')===0 || Data[i].indexOf('/')===0) continue;
+            if (Maps.indexOf(Data[i])>-1) success.push(Data[i]); else error.push(Data[i]);
+          }
+          if (error.length!==0) {
+            let err = '';
+            if (error.length>-1) err = `\n无效地图 ${error.length} 张\n\n${error.join('、')}\n\n(取消则强制保存全部地图)`;
+            if (confirm(`[ 仅保存有效地图? ]\n\n有效地图 ${success.length} 张${err}`)) MapsData.Layer=success.join('\n'); else MapsData.Layer=success.concat(error).join('\n');
+          }else {
+            if (confirm(`[ 是否保存地图池? ]\n\n有效地图 ${success.length} 张`)) MapsData.Layer=success.join('\n'); else return;
+          }
+
+          WS.sendMsg("config/maps_save", JSON.stringify({
+            ServerName: SQSERVER.listenServername,
+            data: {
+              Layer: MapsData.Layer,
+              Level: this.MapsData.Level
+            }
+          }));
+          PAGE.refresh();
+        },
+        getMaps: function () {
+          return ["Albasrah_AAS_v1","Albasrah_AAS_v2","Albasrah_Insurgency_v1","Albasrah_invasion_v1","Albasrah_invasion_v2","Albasrah_RAAS_v1","Albasrah_Skirmish_v1","Albasrah_Skirmish_v2","AlBasrah_TA_v1","Albasrah_TC_v1","Albasrah_TC_v2","Belaya_AAS_v1","Belaya_AAS_v2","Belaya_Invasion_v1","Belaya_Invasion_v2","Belaya_Invasion_v3","Belaya_RAAS_v1","Belaya_RAAS_v2","Belaya_RAAS_v3","Belaya_Skirmish_v1","Belaya_TC_v1","Chora_AAS_v1","Chora_AAS_v2","Chora_AAS_v3","Chora_Insurgency_v1","Chora_Invasion_v1","Chora_Invasion_v2","Chora_RAAS_v1","Chora_RAAS_v2","Chora_Skirmish_v1","Chora_TC_v1","Fallujah_AAS_v1","Fallujah_AAS_v2","Fallujah_Insurgency_v1","Fallujah_Invasion_v1","Fallujah_Invasion_v2","Fallujah_Invasion_v3","Fallujah_RAAS_v1","Fallujah_RAAS_v2","Fallujah_RAAS_v3","Fallujah_Skirmish_v1","Fallujah_Skirmish_v2","Fallujah_TC_v1","Fallujah_TC_v2","FoolsRoad_AAS_v1","FoolsRoad_AAS_v2","FoolsRoad_Destruction_v1","FoolsRoad_Invasion_1","FoolsRoad_RAAS_v1","FoolsRoad_RAAS_v2","FoolsRoad_RAAS_v3","FoolsRoad_Skirmish_v1","FoolsRoad_Skirmish_v2","FoolsRoad_TC_v1","Gorodok_AAS_v1","Gorodok_AAS_v2","Gorodok_Destruction_v1","Gorodok_Insurgency_v1","Gorodok_Invasion_v1","Gorodok_Invasion_v2","Gorodok_RAAS_v1","Gorodok_RAAS_v2","Gorodok_RAAS_v3","Gorodok_RAAS_v4","Gorodok_RAAS_v5","Gorodok_Skirmish_v1","Gorodok_TC_v1","JensensRange_GB-MIL","JensensRange_US-RUS","JensensRange_MEA-INS","Kamdesh_AAS_v1","Kamdesh_Insurgency_v1","Kamdesh_Insurgency_v2","Kamdesh_Invasion_v1","Kamdesh_Invasion_v2","Kamdesh_Invasion_v3","Kamdesh_RAAS_v1","Kamdesh_RAAS_v2","Kamdesh_RAAS_v3","Kamdesh_RAAS_v4","Kamdesh_Skirmish_v1","Kamdesh_TC_v1","Kamdesh_TC_v2","Kohat_AAS_v1","Kohat_AAS_v2","Kohat_Insurgency_v1","Kohat_Invasion_v1","Kohat_Invasion_v2","Kohat_RAAS_v1","Kohat_RAAS_v2","Kohat_RAAS_v3","Kohat_RAAS_v4","Kohat_Skirmish_v1","Kohat_TC_v1","Kokan_AAS_v1","Kokan_Insurgency_v1","Kokan_Invasion_v1","Kokan_RAAS_v1","Kokan_RAAS_v2","Kokan_Skirmish_v1","Kokan_TC_v1","LashkarValley_AAS_v1","LashkarValley_AAS_v2","LashkarValley_Insurgency_v1","LashkarValley_Invasion_v1","LashkarValley_RAAS_v1","LashkarValley_Skirmish_v1","LashkarValley_TC_v1","LashkarValley_TC_v2","Logar_AAS_v1","Logar_AAS_v2","Logar_Insurgency_v1","Logar_RAAS_v1","Logar_Skirmish_v1","Logar_TC_v1","Mestia_AAS_V1","Mestia_Invasion_V1","Mestia_Invasion_V2","Mestia_RAAS_v1","Mestia_Skirmish_v1","Mestia_TC_v1","Mutaha_AAS_v1","Mutaha_AAS_v2","Mutaha_Invasion_v1","Mutaha_RAAS_v1","Mutaha_Skirmish_v1","Mutaha_TC_v1","Mutaha_TC_v2","Narva_AAS_v1","Narva_AAS_v2","Narva_AAS_v3","Narva_Destruction_v1","Narva_Invasion_v1","Narva_Invasion_v2","Narva_RAAS_v1","Narva_Skirmish_v1","Narva_TA_v1","Narva_TC_v1","Narva_TC_v2","Skorpo_AAS_v1","Skorpo_Invasion_v1","Skorpo_Invasion_v2","Skorpo_RAAS_v1","Skorpo_RAAS_v2","Skorpo_RAAS_v3","Skorpo_RAAS_v4","Skorpo_Skirmish_v1","Skorpo_TC_v1","Skorpo_TC_v2","Skorpo_TC_v3","Sumari_AAS_v1","Sumari_Insurgency_v1","Sumari_Invasion_v1","Sumari_RAAS_v1","Sumari_RAAS_v2","Sumari_Skirmish_v1","Sumari_TC_v1","Tallil_AAS_v1","Tallil_AAS_v2","Tallil_Invasion_v1","Tallil_Invasion_v2","Tallil_Invasion_v3","Tallil_RAAS_v1","Tallil_RAAS_v2","Tallil_RAAS_v3","Tallil_RAAS_v4","Tallil_Skirmish_v1","Tallil_Skirmish_v2","Tallil_Skirmish_v3","Tallil_Tanks_v1","Tallil_Tanks_v2","Tallil_TA_v1","Tallil_TC_v1","Tutorial_Helicopter","Tutorial_Infantry","Yehorivka_AAS_v1","Yehorivka_AAS_v2","Yehorivka_Destruction_v1","Yehorivka_Invasion_v1","Yehorivka_Invasion_v2","Yehorivka_RAAS_v1","Yehorivka_RAAS_v2","Yehorivka_RAAS_v3","Yehorivka_RAAS_v4","Yehorivka_RAAS_v5","Yehorivka_Skirmish_v1","Yehorivka_Skirmish_v2","Yehorivka_Skirmish_v3","Yehorivka_TA_v1","Yehorivka_TC_v1","Yehorivka_TC_V2","CAF_AlBasrah_Invasion_v1","CAF_AlBasrah_Invasion_v2","CAF_Belaya_AAS_v1","CAF_Belaya_RAAS_v1","CAF_Belaya_RAAS_v2","CAF_Chora_AAS_v1","CAF_Chora_RAAS_v1","CAF_Fallujah_Invasion_v1","CAF_Fallujah_RAAS_v1","CAF_Fools_Road_RAAS_v1","CAF_GooseBay_AAS_v1","CAF_GooseBay_Invasion_v1","CAF_GooseBay_Invasion_v2","CAF_GooseBay_RAAS_v1","CAF_GooseBay_Skirmish_v1","CAF_Gorodok_AAS_v1","CAF_Gorodok_Invasion_v1","CAF_Gorodok_RAAS_v1","CAF_Gorodok_RAAS_v2","CAF_Gorodok_TC_v1","CAF_JensensRange_CAF-RUS","CAF_Kamdesh_Invasion_v1","CAF_Kamdesh_RAAS_v1","CAF_Kamdesh_TC_v1","CAF_Kohat_Invasion_v1","CAF_Kokan_Valley_RAAS_v1","CAF_Lashkar_Valley_Invasion_v1","CAF_Lashkar_Valley_RAAS_v1","CAF_Lashkar_Valley_TC_v1","CAF_Logar_Valley_RAAS_v1","CAF_Manic_AAS_v1","CAF_Manic_AAS_v2","CAF_Manic_Invasion_v1","CAF_Manic_Invasion_v2","CAF_Manic_RAAS_v1","CAF_Manic_RAAS_v2","CAF_Manic_RAAS_v3","CAF_Manic_RAAS_v4","CAF_Manic_Skirmish_v1","CAF_Manic_Skirmish_v2","CAF_Manic_TC_v2","CAF_Mestia_RAAS_v1","CAF_Mutaha_AAS_v1","CAF_Mutaha_RAAS_v1","CAF_Mutaha_RAAS_v2","CAF_Narva_RAAS_v1","CAF_Skorpo_RAAS_v1","CAF_Sumari_AAS_v1","CAF_Tallil_Outskirts_RAAS_v1","CAF_Tallil_Outskirts_RAAS_v2","CAF_Yehorivka_Invasion_v1","CAF_Yehorivka_RAAS_v1","CAF_Yehorivka_TC_v2"];
+        },
+        Random: function () {
+          let Layer = this.MapsData.Layer.split('\n');
+          Layer.sort(function(){return Math.random()-0.5});
+          this.MapsData.Layer = Layer.join('\n');
+        }
+      }
+    });
+  });
+
+  MI.rListener("onend", function () {});
+</script>

@@ -1,0 +1,73 @@
+<!--suppress JSUnresolvedVariable -->
+<div id="MsgsConfig" class="OneContainer">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">服务器 {{servername}} 循环消息</div>
+        <div class="PanelBody">
+          <div class="col-sm-12 PanelItemF">
+            <div class="PanelItem" v-on:click="toBackServerConfig">
+              <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
+              返回到配置中心
+            </div>
+            <div class="PanelItem" v-on:click="Random">
+              <span class="glyphicon glyphicon-retweet" aria-hidden="true"></span>
+              打乱
+            </div>
+            <div class="PanelItem" v-on:click="toSave">
+              <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+              保存
+            </div>
+            <div class="PanelItem" v-on:click="re">
+              <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+              刷新
+            </div>
+          </div>
+          <p style="color:rgb(230, 55, 55);font-weight:bold">{{msg}}</p>
+          <textarea rows="30" style="width:100%;background:#2F3136" v-model="MsgsData"></textarea>
+          <br />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  MI.rListener("onload", function () {
+
+    // 定义页面地址
+    TOOLS.definePage("template/component/config_msgs", "config/msgs", SQSERVER.listenServername);
+
+    VIEW_MODEL.newVue("MsgsConfig", {
+      el: "#MsgsConfig",
+      data: {
+        msg: ''
+      },
+      methods: {
+        re: function () {
+          PAGE.refresh();
+        },
+        toBackServerConfig: function () {
+          RES.redirectPage("./template/component/config.html", "genuser/home", this.servername);
+        },
+        toSave: function () {
+          if (this.MsgsData.length>100000) return TOOLS.pushMsgWindow('✘ 错误：循环消息内容不可超过 100000 字符！')
+          let Data = this.MsgsData.split('\n');
+          let SData = [];
+          for (let i in Data) if (Data[i]!=='') SData.push(Data[i])
+          WS.sendMsg("config/msgs_save", JSON.stringify({
+            ServerName: SQSERVER.listenServername,
+            data: SData.join('\n')
+          }));
+          PAGE.refresh();
+        },
+        Random: function () {
+          let Data = this.MsgsData.split('\n');
+          Data.sort(function(){return Math.random()-0.5})
+          this.MsgsData = Data.join('\n');
+        }
+      }
+    });
+  });
+
+  MI.rListener("onend", function () {});
+</script>

@@ -1,0 +1,63 @@
+<div id="MCSManagerNews" class="OneContainer">
+  <div class="row">
+    <div class="col-md-8">
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">最新动态与信息通知</div>
+        <!--
+        <div class="PanelBody" style="max-height: 90vh; overflow-y: scroll">
+          <p>关注这里，如果出现BUG/新版本我们会立即通告 (面板自动每天定时更新)</p>
+          <div class="news" v-for="item of items">
+            <p class="color-gray" v-text="item.time"></p>
+            <p v-text="item.msg"></p>
+          </div>
+        </div>
+        -->
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">客户使用反馈</div>
+        <div class="PanelBody">
+          <p>战术小队服务器技术交流QQ群：527459612</p>
+        </div>
+      </div>
+
+      <div class="Panel ">
+        <div class="PanelTitle">开源协议</div>
+        <div class="PanelBody">
+          <p>遵循 MIT 开源协议</p>
+          <p>
+            <small>A short and simple permissive license with conditions only requiring preservation of copyright and
+              license notices. Licensed works, modifications, and larger works may be distributed
+              under different terms and without source code.</small>
+          </p>
+          <br />
+          <p>
+            Github:
+            <a href="https://github.com/Suwings/MCSManager/issues">点击此处</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  MI.rListener("onload", function () {
+    // 定义页面地址
+    TOOLS.definePage("template/feelback", "genuser/home", null);
+
+    RES.ajax({
+      type: "GET",
+      url: "public/news.json",
+      success: function (result) {
+        new Vue({
+          el: "#MCSManagerNews",
+          data: result
+        });
+      }
+    });
+  });
+
+  MI.rListener("onend", function () { });
+</script>

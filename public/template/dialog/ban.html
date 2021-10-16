@@ -1,0 +1,61 @@
+<div id="EditBanConfig">
+  <br />
+  <div class="input-group">
+    <span class="input-group-addon">SteamID64</span>
+    <input type="number" class="form-control" v-model="Ban.SteamID64" placeholder="76561199000000000" v-bind:disabled="Ban.Edit" oninput="if(value.length>17) value=value.slice(0,17)" />
+  </div>
+  <div class="input-group">
+    <span class="input-group-addon">解封时间</span>
+    <input type="text" class="form-control" v-model="Ban.Time" placeholder="2023/02/03、2022-08-18 08:23，永久封禁为0" />
+  </div>
+  <div class="input-group">
+    <span class="input-group-addon">封禁原因</span>
+    <input type="text" class="form-control" v-model="Ban.Msg" placeholder="外挂" />
+  </div>
+  <p style="color:rgb(230, 55, 55);font-weight:bold">{{msg}}</p>
+  <p class="text-right"><a href="https://tieba.baidu.com/p/3626052832" target="_blank"><b>如何获取 SteamID64？</b></a></p>
+
+  <button class="btn btn-success" v-on:click="toSave">添加/保存</button>
+  &nbsp;|&nbsp;
+  <button class="btn btn-danger" v-on:click="TOOLS.popWindClose();PAGE.refresh()">关闭</button>
+
+</div>
+<script>
+  new Vue({
+    el: "#EditBanConfig",
+    data: {
+      msg: '',
+      Ban: SQSERVER.website.EditBan || {SteamID64: '', Time: '', Msg: ''},
+    },
+    methods: {
+      toSave: function () {
+        if (this.Ban.SteamID64.toString().length!==17) {
+          this.msg = '✘ 错误：请正确输入 17 位数的 SteamID64！';
+          return;
+        }else if (!this.Ban.Msg) {
+          this.msg = '✘ 错误：请输入封禁原因！';
+          return;
+        }else if (!this.Ban.Time && this.Ban.Time!=='0') {
+          this.msg = '✘ 错误：请输入解封时间！';
+          return;
+        }else if (this.Ban.Time!=='0') {
+          let Time = Math.round(new Date(this.Ban.Time) / 1000)
+          if (Time <= Math.round(new Date() / 1000)) {
+            this.msg = '✘ 错误：解封时间不能小于现在时间！';
+            return;
+          }else {
+            this.Ban.Time = Time;
+          }
+        }
+        this.Ban.AdminName = '管理面板';
+        this.Ban.Admin = '00000000000000000';
+        console.log(this.Ban)
+        WS.sendMsg("config/bans_add", JSON.stringify({
+          data: this.Ban,
+          servername: SQSERVER.listenServername
+        }));
+        TOOLS.popWindClose();
+        PAGE.refresh();
+      }
+    }});
+</script>

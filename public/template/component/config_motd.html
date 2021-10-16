@@ -1,0 +1,71 @@
+<!--suppress JSUnresolvedVariable -->
+<div id="MOTDConfig" class="OneContainer">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">服务器 {{servername}} 信息(MOTD)</div>
+        <div class="PanelBody">
+          <div class="col-sm-12 PanelItemF">
+            <div class="PanelItem" v-on:click="toBackServerConfig">
+              <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
+              返回到配置中心
+            </div>
+            <div class="PanelItem" v-on:click="toSave">
+              <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+              保存
+            </div>
+            <div class="PanelItem" v-on:click="re">
+              <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+              刷新
+            </div>
+          </div>
+          <textarea rows="10" style="width:100%;background:#2F3136" v-model="MOTDData"></textarea>
+          <pre>&lt;a&gt;黄色字体&lt;/a&gt;<br />&lt;a href="link.com"&gt;黄色字体+链接&lt;/a&gt;</pre>
+        </div>
+      </div>
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">预览</div>
+        <div class="PanelBody">
+          <div v-html="getMOTDData()"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  MI.rListener("onload", function () {
+
+    // 定义页面地址
+    TOOLS.definePage("template/component/config_motd", "config/motd", SQSERVER.listenServername);
+
+    VIEW_MODEL.newVue("MOTDConfig", {
+      el: "#MOTDConfig",
+      methods: {
+        re: function () {
+          PAGE.refresh();
+        },
+        toBackServerConfig: function () {
+          RES.redirectPage("./template/component/config.html", "genuser/home", this.servername);
+        },
+        toSave: function () {
+          if (this.MOTDData.length>10000) return TOOLS.pushMsgWindow('✘ 错误：MOTD内容不可超过 10000 字符！')
+          WS.sendMsg("config/motd_save", JSON.stringify({
+            ServerName: SQSERVER.listenServername,
+            data: this.MOTDData.replace(/<br>/gim, '\n')
+          }));
+          PAGE.refresh();
+        },
+        getMOTDData: function () {
+          return this.MOTDData
+                  .replace(/ /gim, "&nbsp;")
+                  .replace(/\n/gim, '<br />')
+                  .replace(/<script>/gim, '&lt;script&gt;')
+                  .replace(/<\/script>/gim, '&lt;/script&gt;')
+        }
+      }
+    });
+  });
+
+  MI.rListener("onend", function () {});
+</script>

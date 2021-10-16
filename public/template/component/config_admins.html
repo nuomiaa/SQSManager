@@ -1,0 +1,234 @@
+<!--suppress JSUnresolvedVariable -->
+<div id="AdminsConfig" class="OneContainer">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">服务器 {{servername}} 权限组与管理员列表</div>
+        <div class="PanelBody">
+          <div class="row">
+            <div class="col-sm-12 PanelItemF">
+              <div class="PanelItem" v-on:click="toBackServerConfig">
+                <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
+                返回到配置中心
+              </div>
+              <div class="PanelItem" v-on:click="re">
+                <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+                刷新
+              </div>
+              <div class="PanelItem" v-on:click="getAdminsData">
+                <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+                导出
+              </div>
+              <div class="PanelItem" v-on:click="upAdminsDataButton">
+                <span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span>
+                导入
+              </div>
+              <p style="color:#DCDDDE;line-height:35px;float:right">权限组: {{AdminsData.Groups.length|0}}　|　管理员: {{AdminsData.Admins.length|0}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="Panel PanelBlack" v-show="upAdmins">
+    <div class="PanelTitle">导入 Admins.cfg</div>
+    <div class="PanelBody">
+      <textarea class="textarea" rows="20" v-model="upAdminsDataText"></textarea>
+      <div class="text-center PanelItem" v-on:click="upAdminsData">
+        <span class="glyphicon glyphicon-send" aria-hidden="true"></span>
+        导入
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">权限组列表</div>
+        <div class="PanelBody">
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="PanelItem" v-on:click="toNewGroup">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                新建权限租
+              </div>
+              <table class="PropertiesList" style="width:100%">
+                <tr>
+                  <th>权限组名称</th>
+                  <th>权限</th>
+                  <th>操作</th>
+                </tr>
+                <tr v-for="(obj, i) in AdminsData.Groups" v-if="obj">
+                  <td v-text="obj.Group"></td>
+                  <td v-text="obj.Power.length+' 项'"></td>
+                  <td>
+                    <a href="javascript:" v-on:click="toEditGroup(i)">[ 修改 ]</a>
+                    &nbsp;
+                    <a href="javascript:" v-on:click="toDelGroup(i)">[ 删除 ]</a>
+                  </td>
+                </tr>
+                <tr v-if="AdminsData.Groups.length<1">
+                  <td colspan="3"><a href="javascript:" v-on:click="toNewGroup">[ 点击新建权限组 ]</a></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">管理员列表</div>
+        <div class="PanelBody">
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="PanelItem" v-on:click="toNewAdmin">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                添加管理员
+              </div>
+              <table class="PropertiesList" style="width:100%">
+                <tr>
+                  <th>SteamID64</th>
+                  <th>权限组</th>
+                  <th>备注</th>
+                  <th>操作</th>
+                </tr>
+                <tr v-for="(obj, i) in AdminsData.Admins" v-if="obj">
+                  <td><a :href="'//steamcommunity.com/profiles/'+obj.SteamID64" target="_blank">{{obj.SteamID64}}</a></td>
+                  <td v-text="obj.Group"></td>
+                  <td v-text="obj.Msg"></td>
+                  <td>
+                    <a href="javascript:" v-on:click="toEditAdmin(i)">[ 修改 ]</a>
+                    &nbsp;
+                    <a href="javascript:" v-on:click="toDelAdmin(i)">[ 删除 ]</a>
+                  </td>
+                </tr>
+                <tr v-if="AdminsData.Admins.length<1">
+                  <td colspan="4"><a href="javascript:" v-on:click="toNewAdmin">[ 点击添加管理员 ]</a></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  SQSERVER.website.EditGroup = {};
+  MI.rListener("onload", function () {
+
+    // 定义页面地址
+    TOOLS.definePage("template/component/config_admins", "config/admins", SQSERVER.listenServername);
+
+    VIEW_MODEL.newVue("AdminsConfig", {
+      el: "#AdminsConfig",
+      data: {upAdmins: false, upAdminsDataText: ''},
+      methods: {
+        re: function () {
+          PAGE.refresh();
+        },
+        toBackServerConfig: function () {
+          RES.redirectPage("./template/component/config.html", "genuser/home", this.servername);
+        },
+        toNewGroup: function () {
+          delete SQSERVER.website.Groups;
+          delete SQSERVER.website.EditAdmin;
+          PAGE.listenServername = SQSERVER.listenServername;
+          RES.redirectPage("./template/component/new_group.html", null);
+        },
+        toEditGroup: function (i) {
+          PAGE.listenServername = SQSERVER.listenServername;
+          SQSERVER.website.EditGroup = this.AdminsData.Groups[i];
+          RES.redirectPage("./template/component/new_group.html", null);
+        },
+        toDelGroup: function (i) {
+          if (!confirm(`您确定要删除权限组『${this.AdminsData.Groups[i].Group}』吗？`)) return;
+          WS.sendMsg("config/admins_del_group", JSON.stringify({
+            GroupName: this.AdminsData.Groups[i].Group,
+            ServerName: SQSERVER.listenServername
+          }));
+          PAGE.refresh();
+        },
+        toNewAdmin: function () {
+          delete SQSERVER.website.Groups;
+          delete SQSERVER.website.EditAdmin;
+          SQSERVER.website.Groups = this.AdminsData.Groups;
+          TOOLS.popWind({
+            style: {
+              maxWidth: "600px",
+              top: "20%"
+            },
+            title: "添加管理员",
+            template: "template/dialog/admin.html"
+          });
+        },
+        toEditAdmin: function (i) {
+          SQSERVER.website.Groups = this.AdminsData.Groups;
+          SQSERVER.website.EditAdmin = this.AdminsData.Admins[i];
+          SQSERVER.website.EditAdmin.Edit = true;
+          TOOLS.popWind({
+            style: {
+              maxWidth: "600px",
+              top: "20%"
+            },
+            title: "修改管理员",
+            template: "template/dialog/admin.html"
+          });
+        },
+        toDelAdmin: function (i) {
+          if (!confirm(`您确定要删除管理员『${this.AdminsData.Admins[i].SteamID64}』吗？`)) return;
+          WS.sendMsg("config/admins_del", JSON.stringify({
+            SteamID64: this.AdminsData.Admins[i].SteamID64,
+            ServerName: SQSERVER.listenServername
+          }));
+          PAGE.refresh();
+        },
+        getAdminsData: function () {
+          if (!confirm(`您确定要导出所有 权限组 与 管理员 吗？\n\n确定后浏览器将自动请求下载`)) return;
+          let AdminsData=`////////////////////////////////////////\n//\n// 『虚银』SQUAD 服务器管理面板\n//\n// 【执行】Admins.cfg 导出\n// 【时间】${TOOLS.getFormatDate()}\n// 【内容】权限组:${this.AdminsData.Groups.length} | 管理员:${this.AdminsData.Admins.length}\n//\n////////////////////////////////////////\n\n\n\n`;
+          let AddGroup=[];
+          let AddAdmin=[];
+
+          for (let group in this.AdminsData.Groups){
+            let g = this.AdminsData.Groups[group];
+            if (AddGroup.indexOf(g.Group)===-1 && g.Power.length>0) {
+              AdminsData += `Group=${g.Group}:${g.Power.join(',')}\n`
+            }
+            AddGroup.push(g.Group);
+          }
+
+          AdminsData += '\n';
+
+          for (let admin in this.AdminsData.Admins){
+            let a = this.AdminsData.Admins[admin];
+            if (a.Msg) a.Msg = ' //' + a.Msg;
+            if (AddAdmin.indexOf(a.SteamID64)===-1) {
+              AdminsData += `Admin=${a.SteamID64}:${a.Group}${a.Msg}\n`;
+              AddAdmin.push(a.SteamID64);
+            }
+          }
+
+          TOOLS.DownloadFile('Admins.cfg', AdminsData);
+          PAGE.refresh();
+        },
+        upAdminsDataButton: function () {
+          this.upAdmins = !this.upAdmins;
+        },
+        upAdminsData: function () {
+          if (!confirm(`您确定要导入『Admins.cfg』吗？\n\n【注意】导入自动过滤无效与格式错误的数据，且会覆盖原数据！`)) return;
+          if (this.upAdminsDataText.length>100000) return TOOLS.pushMsgWindow('✘ 错误：Admins.cfg 内容不可超过 100000 字符！')
+          WS.sendMsg("config/admins_save", JSON.stringify({
+            data: this.upAdminsDataText,
+            ServerName: SQSERVER.listenServername
+          }));
+          PAGE.refresh();
+        }
+      }
+    });
+  });
+
+  MI.rListener("onend", function () {});
+</script>

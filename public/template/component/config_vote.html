@@ -1,0 +1,60 @@
+<!--suppress JSUnresolvedVariable -->
+<div id="VoteConfig" class="OneContainer">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">服务器 {{servername}} 投票配置</div>
+        <div class="PanelBody">
+          <div class="col-sm-12 PanelItemF">
+            <div class="PanelItem" v-on:click="toBackServerConfig">
+              <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
+              返回到配置中心
+            </div>
+            <div class="PanelItem" v-on:click="toSave">
+              <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+              保存
+            </div>
+            <div class="PanelItem" v-on:click="re">
+              <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+              刷新
+            </div>
+          </div>
+          <textarea rows="30" style="width:100%;background:#2F3136" v-model="VoteData"></textarea>
+          <br />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  MI.rListener("onload", function () {
+
+    // 定义页面地址
+    TOOLS.definePage("template/component/config_vote", "config/vote", SQSERVER.listenServername);
+
+    VIEW_MODEL.newVue("VoteConfig", {
+      el: "#VoteConfig",
+      data: {
+        msg: ''
+      },
+      methods: {
+        re: function () {
+          PAGE.refresh();
+        },
+        toBackServerConfig: function () {
+          RES.redirectPage("./template/component/config.html", "genuser/home", this.servername);
+        },
+        toSave: function () {
+          if (this.VoteData.length>100000) return TOOLS.pushMsgWindow('✘ 错误：[投票配置] 内容不可超过 100000 字符！')
+          WS.sendMsg("config/vote_save", JSON.stringify({
+            ServerName: SQSERVER.listenServername,
+            data: this.VoteData
+          }));
+          PAGE.refresh();
+        }
+      }
+    });
+  });
+
+  MI.rListener("onend", function () {});
+</script>

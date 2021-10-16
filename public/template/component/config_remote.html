@@ -1,0 +1,78 @@
+<!--suppress JSUnresolvedVariable -->
+<div id="RemoteConfig" class="OneContainer">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">服务器 {{servername}} 循环消息</div>
+        <div class="PanelBody">
+          <div class="row">
+            <div class="col-sm-12 PanelItemF">
+              <div class="PanelItem" v-on:click="toBackServerConfig">
+                <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
+                返回到配置中心
+              </div>
+              <div class="PanelItem" v-on:click="toSave">
+                <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+                保存
+              </div>
+              <div class="PanelItem" v-on:click="re">
+                <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+                刷新
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">远程管理员列表</div>
+        <div class="PanelBody">
+          <p style="color:rgb(230, 55, 55);font-weight:bold">{{msg}}</p>
+          <textarea rows="10" style="width:100%;background:#2F3136" v-model="AdminList"></textarea>
+          <br />
+        </div>
+      </div>
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">远程封禁列表</div>
+        <div class="PanelBody">
+          <p style="color:rgb(230, 55, 55);font-weight:bold">{{msg}}</p>
+          <textarea rows="10" style="width:100%;background:#2F3136" v-model="BanList"></textarea>
+          <br />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  MI.rListener("onload", function () {
+
+    // 定义页面地址
+    TOOLS.definePage("template/component/config_msgs", "config/remote", SQSERVER.listenServername);
+
+    VIEW_MODEL.newVue("RemoteConfig", {
+      el: "#RemoteConfig",
+      data: {
+        msg: ''
+      },
+      methods: {
+        re: function () {
+          PAGE.refresh();
+        },
+        toBackServerConfig: function () {
+          RES.redirectPage("./template/component/config.html", "genuser/home", this.servername);
+        },
+        toSave: function () {
+          if (this.AdminList.length>100000) return TOOLS.pushMsgWindow('✘ 错误：远程管理员列表 内容不可超过 100000 字符！')
+          if (this.BanList.length>100000) return TOOLS.pushMsgWindow('✘ 错误：远程封禁列表 内容不可超过 100000 字符！')
+          WS.sendMsg("config/remote_save", JSON.stringify({
+            ServerName: SQSERVER.listenServername,
+            AdminList: this.AdminList,
+            BanList: this.BanList
+          }));
+          PAGE.refresh();
+        }
+      }
+    });
+  });
+
+  MI.rListener("onend", function () {});
+</script>

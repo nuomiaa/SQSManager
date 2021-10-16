@@ -1,0 +1,185 @@
+<div id="ServerPanel" class="OneContainer">
+  <div class="row">
+    <div class="col-md-3">
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">服务器信息</div>
+        <div class="PanelBody">
+          <!--右侧-->
+          <div class="row">
+            <div class="col-md-12">
+              <div class="PanelItem">标识名: {{ name }}</div>
+              <div class="PanelItem">创建时间: {{ createDate }}</div>
+              <div class="PanelItem">最后启动: {{ lastDate }}</div>
+              <div class="PanelItem" v-if="run">状态:<span class="color-green">正在运行</span></div>
+              <div class="PanelItem" v-else="run">状态: 未运行</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-9">
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">基本参数</div>
+        <div class="PanelBody">
+          <!--left 侧-->
+          <div class="row">
+            <div class="col-md-6">
+
+              <div class="input-group input-group-sm">
+                <span class="input-group-addon">服务器名字</span>
+                <input type="text" class="form-control" v-model="name" placeholder="[必填(仅限字母数字下划线组合)]" />
+              </div>
+
+              <div class="input-group input-group-sm">
+                <span class="input-group-addon"> 服务器类型 </span>
+                <select v-model="type" class="form-control" >
+                  <option value="pure">纯净</option>
+                  <option value="mod">模组</option>
+                </select>
+              </div>
+
+              <div class="input-group input-group-sm">
+                <span class="input-group-addon"> 到期限制 </span>
+                <input type="text" class="form-control" v-model="timeLimitDate" placeholder="[未设定 如 2018/10/01 2020/01/12]" />
+              </div>
+
+              <div class="row">
+                <div class="col-sm-6">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-addon"> 用户QQ </span>
+                    <input type="number" class="form-control" v-model="UserQQ" placeholder="[未设置]" />
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-addon"> TickRate限制 </span>
+                    <input type="number" class="form-control" v-model="TickRate" placeholder="[无限制]" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="input-group input-group-sm">
+                <span class="input-group-addon">启动附加参数</span>
+                <input type="text" class="form-control" v-model="addCmd" placeholder="[无附加参数]" />
+              </div>
+              <div class="input-group input-group-sm">
+                <span class="input-group-addon">服务端根目录</span>
+                <input type="text" class="form-control" v-model="cwd" oninput="value=value.replace(/\\/g,'/')" />
+              </div>
+
+              <div class="row">
+                <div class="col-sm-6">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-addon"> 游戏端口 </span>
+                    <input type="number" class="form-control" v-model="GamePort" placeholder="[缺省值]" />
+                  </div>
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-addon"> 查询端口 </span>
+                    <input type="number" class="form-control" v-model="QueryPort" placeholder="[缺省值]" />
+                  </div>
+                </div>
+
+                <div class="col-sm-6">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-addon"> 人数限制 </span>
+                    <input type="number" class="form-control" v-model="MaxPlayer" placeholder="[无限制]" />
+                  </div>
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-addon"> 模组编号 </span>
+                    <input v-bind:disabled="type=='pure'" type="number" class="form-control" v-model="ModID" placeholder="[不使用模组]" />
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--底部-->
+      <div class="Panel">
+        <div class="PanelTitle"></div>
+        <div class="PanelBody">
+          <div class="row">
+            <!-- <div class="col-lg-12">
+							<p>普通用户无权修改任何服务器的启动参数，仅仅可修改 Squad 相关配置。</p>
+							<div class="Line"></div>
+						</div> -->
+          </div>
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="" style="float: right; margin-top: 20px">
+                <button class="btn btn-primary" v-on:click="toConsole(name)">返回控制面板</button>
+                &nbsp;|&nbsp;
+                <button class="btn btn-success" v-on:click="toRebulider()">保存设置</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  MI.rListener("onload", function () {
+    VIEW_MODEL.newVue("ServerPanel", {
+      el: "#ServerPanel",
+      data: {
+        oldServerName: ''
+      },
+      methods: {
+        toOpenCommmandInfo: function () {
+          TOOLS.popWind({
+            style: {
+              maxWidth: "700px"
+            },
+            title: "自定义参数说明",
+            template: "template/dialog/usercommand.html"
+          });
+        },
+        toConsole: function (serverName) {
+          SQSERVER.listenServername = this.oldServerName;
+          RES.redirectPage("./template/component/console.html", "server/console", this.oldServerName);
+        },
+        toRebulider: function () {
+          let addCmdList = this.addCmd.split(" ");
+          if (!TOOLS.isStdText(this.name)) {
+            TOOLS.pushMsgWindow("服务器名字不合法！仅限字母数字下划线！");
+            return;
+          }
+          if (this.timeLimitDate != "" && !TOOLS.isSmallDate(this.timeLimitDate)) {
+            TOOLS.pushMsgWindow("您输入的时间期限格式不正确，请检查再尝试。");
+            return;
+          }
+          let obj = {
+            addCmd: addCmdList,
+            serverName: this.name,
+            type: this.type,
+            cwd: this.cwd,
+            UserQQ: this.UserQQ,
+            GamePort: this.GamePort,
+            QueryPort: this.QueryPort,
+            MaxPlayer: Number(this.MaxPlayer),
+            ModID: Number(this.ModID),
+            timeLimitDate: this.timeLimitDate,
+            TickRate: this.TickRate,
+            oldServerName: this.oldServerName
+          };
+          WS.sendMsg("server/rebulider", JSON.stringify(obj));
+          setTimeout(function () {
+            RES.redirectPage("./template/server.html", "server/view");
+          }, 100);
+        }
+      },
+      watch: {
+        type: function(data){
+          if (data!=='mod') this.ModID='';
+        }
+      }
+    });
+    VIEW_MODEL["ServerPanel"].addCmd = VIEW_MODEL["ServerPanel"].addCmd.toString().replace(/,/gim, " ");
+    VIEW_MODEL["ServerPanel"].oldServerName = VIEW_MODEL["ServerPanel"].name + "";
+  });
+
+  MI.rListener("onend", function () {});
+</script>

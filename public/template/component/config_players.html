@@ -1,0 +1,73 @@
+<!--suppress JSUnresolvedVariable -->
+<div id="PlayersConfig" class="OneContainer">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">服务器 {{servername}} 封禁玩家列表</div>
+        <div class="PanelBody">
+          <div class="col-sm-12 PanelItemF">
+            <div class="PanelItem" v-on:click="toBackServerConfig()">
+              <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
+              返回到配置中心
+            </div>
+            <div class="PanelItem" v-on:click="toNewBan()">
+              <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+              添加封禁
+            </div>
+            <div class="PanelItem" v-on:click="re()">
+              <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+              刷新
+            </div>
+          </div>
+          <div v-if="console.log(Data)"></div>
+          <!--
+          <table class="PropertiesList" style="width:100%">
+            <tr>
+              <th>SteamID64</th>
+              <th>解封时间</th>
+              <th>备注</th>
+              <th>操作</th>
+            </tr>
+            <tr v-for="(obj, i) in BansData" v-if="obj">
+              <td v-text="obj.SteamID64"></td>
+              <td v-text="TOOLS.getFormatDate(obj.Time)"></td>
+              <td v-text="obj.Msg"></td>
+              <td>
+                <a href="javascript:" v-on:click="toEditBan(i)">[ 修改 ]</a>
+                &nbsp;
+                <a href="javascript:" v-on:click="toDelBan(i)">[ 删除 ]</a>
+              </td>
+            </tr>
+            <tr v-if="BansData.length<1">
+              <td colspan="4"><a href="javascript:" v-on:click="toNewAdmin()">[ 点击添加封禁玩家 ]</a></td>
+            </tr>
+          </table>
+          -->
+          <br />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  MI.rListener("onload", function () {
+
+    // 定义页面地址
+    TOOLS.definePage("template/component/config_players", "rcon/update", SQSERVER.listenServername);
+
+    VIEW_MODEL.newVue("PlayersConfig", {
+      el: "#PlayersConfig",
+      methods: {
+        re: function () {
+          PAGE.refresh();
+        },
+        toBackServerConfig: function () {
+          RES.redirectPage("./template/component/config.html", "genuser/home", this.servername);
+        }
+      }
+    });
+  });
+
+  MI.rListener("onend", function () {});
+</script>

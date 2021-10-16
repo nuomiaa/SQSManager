@@ -1,0 +1,183 @@
+<style>
+  .PAGE_newserverx_PanelBody p {
+    margin-left: 12px;
+  }
+
+  .PAGE_NewserverxCreatePanelWapper {
+    max-width: 700px;
+    margin: auto;
+    margin-top: 14%;
+  }
+
+  .PAGE_NewserverxLogK {
+    padding: 8px;
+    font-weight: 400;
+    font-size: 13px;
+    color: #DCDDDE;
+    text-align: center;
+  }
+
+  .PAGE_NewserverxLogV {
+    margin: 20px 8px 2px 8px;
+    color: #FFFFFF;
+    font-size: 20px;
+    text-align: center;
+    line-height: 40px;
+    overflow: hidden;
+    font-weight: 800;
+  }
+</style>
+<div id="ServerConfig" class="OneContainer">
+  <div class="PAGE_NewserverxCreatePanelWapper">
+    <div class="Panel PanelBlack">
+      <div class="PanelTitle">设置服务器：{{SQSERVER.listenServername}}
+        <a style="float:right;text-decoration:none;" v-on:click="toBackConsole()">
+          <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
+          返回到控制台
+        </a>
+      </div>
+      <div class="PanelBody">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="PanelItemBlock" v-on:click="toProperties">
+              <div class="PAGE_NewserverxLogV">
+                <p>基础配置</p>
+              </div>
+              <div class="PAGE_NewserverxLogK">Server.cfg</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="PanelItemBlock" v-on:click="toAdmins">
+              <div class="PAGE_NewserverxLogV">
+                <p>权限管理</p>
+              </div>
+              <div class="PAGE_NewserverxLogK">Admins.cfg</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="PanelItemBlock" v-on:click="toBans">
+              <div class="PAGE_NewserverxLogV">
+                <p>封禁管理</p>
+              </div>
+              <div class="PAGE_NewserverxLogK">Bans.cfg</div>
+            </div>
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-md-4">
+            <div class="PanelItemBlock" v-on:click="toMOTD">
+              <div class="PAGE_NewserverxLogV">
+                <p>设置信息</p>
+              </div>
+              <div class="PAGE_NewserverxLogK">MOTD.cfg</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="PanelItemBlock" v-on:click="toLicense">
+              <div class="PAGE_NewserverxLogV">
+                <p>设置许可证</p>
+              </div>
+              <div class="PAGE_NewserverxLogK">License.cfg</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="PanelItemBlock" v-on:click="toVote">
+              <div class="PAGE_NewserverxLogV">
+                <p>投票配置</p>
+              </div>
+              <div class="PAGE_NewserverxLogK">VoteConfig.cfg</div>
+            </div>
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-md-4">
+            <div class="PanelItemBlock" v-on:click="toMaps">
+              <div class="PAGE_NewserverxLogV">
+                <p>设置地图池</p>
+              </div>
+              <div class="PAGE_NewserverxLogK">MapRotation.cfg</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="PanelItemBlock" v-on:click="toRemote">
+              <div class="PAGE_NewserverxLogV">
+                <p>设置远程URL</p>
+              </div>
+              <div class="PAGE_NewserverxLogK">RemoteListHosts.cfg</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="PanelItemBlock" v-on:click="toMsgs">
+              <div class="PAGE_NewserverxLogV">
+                <p>设置循环消息</p>
+              </div>
+              <div class="PAGE_NewserverxLogK">ServerMessages.cfg</div>
+            </div>
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-md-4">
+            <div class="PanelItemBlock" v-on:click="toExcluded">
+              <div class="PAGE_NewserverxLogV">
+                <p>屏蔽地图</p>
+              </div>
+              <div class="PAGE_NewserverxLogK">Excluded*.cfg</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  MI.rListener("onload", function () {
+
+    // 定义页面地址
+    TOOLS.definePage("template/component/config", "genuser/home", SQSERVER.listenServername);
+
+    VIEW_MODEL.newVue("ServerConfig", {
+      el: "#ServerConfig",
+      methods: {
+        toBackConsole: function () {
+          RES.redirectPage("./template/component/console.html", "server/console", SQSERVER.listenServername);
+        },
+        toProperties: function () {
+          RES.redirectPage("./template/component/properties.html", "server/properties", SQSERVER.listenServername);
+        },
+        toAdmins: function () {
+          RES.redirectPage("./template/component/config_admins.html", "config/admins", SQSERVER.listenServername);
+        },
+        toBans: function () {
+          RES.redirectPage("./template/component/config_bans.html", "config/bans", SQSERVER.listenServername);
+        },
+        toMOTD: function () {
+          RES.redirectPage("./template/component/config_motd.html", "config/motd", SQSERVER.listenServername);
+        },
+        toLicense: function () {
+          RES.redirectPage("./template/component/config_license.html", "config/license", SQSERVER.listenServername);
+        },
+        toMaps: function () {
+          RES.redirectPage("./template/component/config_maps.html", "config/maps", SQSERVER.listenServername);
+        },
+        toRemote: function () {
+          RES.redirectPage("./template/component/config_remote.html", "config/remote", SQSERVER.listenServername);
+        },
+        toMsgs: function () {
+          RES.redirectPage("./template/component/config_msgs.html", "config/msgs", SQSERVER.listenServername);
+        },
+        toVote: function () {
+          RES.redirectPage("./template/component/config_vote.html", "config/vote", SQSERVER.listenServername);
+        },
+        toExcluded: function () {
+          RES.redirectPage("./template/component/config_excluded.html", "config/excluded", SQSERVER.listenServername);
+        }
+      }
+    });
+  });
+
+  MI.rListener("onend", function () {});
+</script>

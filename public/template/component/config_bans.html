@@ -1,0 +1,170 @@
+<!--suppress JSUnresolvedVariable -->
+<div id="BansConfig" class="OneContainer">
+  <div class="row">
+    <div class="col-md-12">
+
+      <div class="Panel PanelBlack" v-show="upBans">
+        <div class="PanelTitle">导入 Bans.cfg</div>
+        <div class="PanelBody">
+          <textarea class="textarea" rows="20" v-model="upBansDataText"></textarea>
+          <div class="text-center PanelItem" v-on:click="upBansData">
+            <span class="glyphicon glyphicon-send" aria-hidden="true"></span>
+            导入
+          </div>
+        </div>
+      </div>
+
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">服务器 {{servername}} 封禁玩家列表</div>
+        <div class="PanelBody">
+          <div class="col-sm-12 PanelItemF">
+            <div class="PanelItem" v-on:click="toBackServerConfig">
+              <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
+              返回到配置中心
+            </div>
+            <div class="PanelItem" v-on:click="toNewBan">
+              <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+              添加封禁
+            </div>
+            <div class="PanelItem" v-on:click="re()">
+              <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+              刷新
+            </div>
+            <div class="PanelItem" v-on:click="getBansData">
+              <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+              导出
+            </div>
+            <div class="PanelItem" v-on:click="upBansDataButton">
+              <span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span>
+              导入
+            </div>
+            <p style="color:#DCDDDE;line-height:35px;float:right">封禁玩家: {{BansData.length|0}}</p>
+          </div>
+
+          <table class="PropertiesList" style="width:100%">
+            <tr>
+              <th>管理员昵称</th>
+              <th>管理员ID</th>
+              <th>封禁ID</th>
+              <th>解封时间</th>
+              <th>备注</th>
+              <th>操作</th>
+            </tr>
+            <tr v-for="(obj, i) in BansData" v-if="obj">
+              <td v-text="obj.AdminName"></td>
+              <td><a :href="'//steamcommunity.com/profiles/'+obj.Admin" target="_blank">{{obj.Admin}}</a></td>
+              <td><a :href="'//steamcommunity.com/profiles/'+obj.SteamID64" target="_blank">{{obj.SteamID64}}</a></td>
+              <td v-text="TOOLS.getFormatDate(obj.Time)"></td>
+              <td v-text="obj.Msg"></td>
+              <td>
+                <a href="javascript:" v-on:click="toEditBan(i)">[ 修改 ]</a>
+                &nbsp;
+                <a href="javascript:" v-on:click="toDelBan(i)">[ 删除 ]</a>
+              </td>
+            </tr>
+            <tr v-if="BansData.length<1">
+              <td colspan="6"><a href="javascript:" v-on:click="toNewBan">[ 点击添加封禁玩家 ]</a></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  MI.rListener("onload", function () {
+
+    // 定义页面地址
+    TOOLS.definePage("template/component/config_bans", "config/bans", SQSERVER.listenServername);
+
+    VIEW_MODEL.newVue("BansConfig", {
+      el: "#BansConfig",
+      data: {upBans: false, upBansDataText: ''},
+      methods: {
+        re: function () {
+          PAGE.refresh();
+        },
+        toBackServerConfig: function () {
+          RES.redirectPage("./template/component/config.html", "genuser/home", this.servername);
+        },
+        toNewBan: function () {
+          delete SQSERVER.website.EditBan;
+          TOOLS.popWind({
+            style: {
+              maxWidth: "600px",
+              top: "20%"
+            },
+            title: "添加封禁玩家",
+            template: "template/dialog/ban.html"
+          });
+        },
+        toEditBan: function (i) {
+          SQSERVER.website.EditBan = this.BansData[i];
+          SQSERVER.website.EditBan.Edit = true;
+          if (SQSERVER.website.EditBan.Time!==0) {
+            SQSERVER.website.EditBan.Time = TOOLS.getFormatDate(SQSERVER.website.EditBan.Time)
+          }
+          TOOLS.popWind({
+            style: {
+              maxWidth: "600px",
+              top: "20%"
+            },
+            title: "修改封禁玩家",
+            template: "template/dialog/ban.html"
+          });
+        },
+        toDelBan: function (i) {
+          if (!confirm(`您确定要删除封禁玩家『${this.BansData[i].SteamID64}』吗？`)) return;
+          WS.sendMsg("config/bans_del", JSON.stringify({
+            SteamID64: this.BansData[i].SteamID64,
+            ServerName: SQSERVER.listenServername
+          }));
+          PAGE.refresh();
+        },
+        getBansData: function () {
+          if (!confirm(`您确定要导出所有 封禁玩家 吗？\n\n确定后浏览器将自动请求下载`)) return;
+          let BansData=`////////////////////////////////////////\n//\n// 『虚银』SQUAD 服务器管理面板\n//\n// 【执行】Bans.cfg 导出\n// 【时间】${TOOLS.getFormatDate()}\n// 【内容】封禁玩家:${this.BansData.length}\n//\n////////////////////////////////////////\n\n\n\n`;
+          let AddBan=[];
+
+          function sortData(a, b) {
+            if (b.Time===0) {
+              return b.Time - a.Time
+            }else {
+              return a.Time - b.Time
+            }
+          }
+          this.BansData.sort(sortData)
+
+          for (let i in this.BansData){
+            let a = this.BansData[i];
+            if (a.Msg) a.Msg = ' //' + a.Msg;
+            if (AddBan.indexOf(a.SteamID64) !== -1) continue;
+            if (a.Admin || a.AdminName){
+              BansData += `${a.AdminName} [SteamID ${a.Admin}] Banned:${a.SteamID64}:${a.Time}${a.Msg}\n`;
+            }else {
+              BansData += `${a.SteamID64}:${a.Time}${a.Msg}\n`;
+            }
+            AddBan.push(a.SteamID64);
+          }
+
+          TOOLS.DownloadFile('Bans.cfg', BansData);
+          PAGE.refresh();
+        },
+        upBansDataButton: function () {
+          this.upBans = !this.upBans;
+        },
+        upBansData: function () {
+          if (!confirm(`您确定要导入『Bans.cfg』吗？\n\n【注意】导入自动过滤无效与格式错误的数据，且会覆盖原数据！`)) return;
+          WS.sendMsg("config/bans_save", JSON.stringify({
+            data: this.upBansDataText,
+            ServerName: SQSERVER.listenServername
+          }));
+          PAGE.refresh();
+        }
+      }
+    });
+  });
+
+  MI.rListener("onend", function () {});
+</script>

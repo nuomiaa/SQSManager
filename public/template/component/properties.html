@@ -1,0 +1,134 @@
+<div id="ServerProperties" class="OneContainer">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">服务端 Server.cfg 配置文件</div>
+        <div class="PanelBody">
+          <div class="row">
+            <div class="col-sm-12 PanelItemF">
+              <p>您可以进行如下操作:</p>
+              <div class="PanelItem" v-on:click="toBackConsole">
+                <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
+                返回到配置中心
+              </div>
+              <div class="PanelItem" v-on:click="toUpdateProperties">
+                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                保存配置
+              </div>
+              <div class="PanelItem" v-on:click="re">
+                <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+                从内存刷新
+              </div>
+              <div class="PanelItem" v-on:click="toUpdatePropertiesFormFile">
+                <span class="glyphicon glyphicon-retweet" aria-hidden="true"></span>
+                从文件刷新
+              </div>
+              <div class="PanelItem" style="float:right" v-on:click="toDelFile" title="修复文件乱码">
+                <span class="glyphicon glyphicon-floppy-remove" aria-hidden="true"></span>
+                <b>删除文件</b>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-12">
+              <p>{{ serverName }} 服务器 Server.cfg 配置文件更改</p>
+              <table class="PropertiesList" width="100%">
+                <tr>
+                  <th>原字段键值</th>
+                  <th>第三方解释</th>
+                  <th width="45%">存在的值</th>
+                </tr>
+                <tr v-for="(val, key) in properties">
+                  <td v-text="key"></td>
+                  <td v-text="findProperties(key)"></td>
+                  <td>
+                    <select v-if="typeof(properties[key])=='boolean'" v-model="properties[key]" class="form-control">
+                      <option :value="true">启用</option>
+                      <option :value="false">停用</option>
+                    </select>
+                    <select v-else-if="key=='MapRotationMode'" v-model="properties[key]" class="form-control">
+                      <option value="LevelList">地图类型</option>
+                      <option value="LayerList">地图代码</option>
+                      <option value="LevelList_Randomized">地图类型_随机</option>
+                      <option value="LayerList_Randomized">地图代码_随机</option>
+                    </select>
+                    <input v-else-if="typeof(properties[key])=='number'" type="number" class="form-control" aria-describedby="basic-addon1" v-model="properties[key]" />
+                    <input v-else type="text" class="form-control" aria-describedby="basic-addon1" v-model="properties[key]" />
+                  </td>
+                </tr>
+              </table>
+              <br />
+              <div class="row">
+                <div class="col-sm-12 PanelItemF">
+                  <div class="PanelItem" v-on:click="toBackConsole">
+                    <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
+                    返回到配置中心
+                  </div>
+                  <div class="PanelItem" v-on:click="toUpdateProperties">
+                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                    保存配置
+                  </div>
+                  <div class="PanelItem" v-on:click="toUpdatePropertiesFormFile">
+                    <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+                    刷新
+                  </div>
+                  <hr />
+                  <p>最后，请检查是否符合格式，条件，仔细检查后即可确认修改，或者直接返回到其他页面直接舍弃修改。</p>
+                  <p>如果显示不全或不是最新，您可以单击 [重新刷新读取] 来进行获取更新，设置完毕请重启服务器或等待切换地图。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="./common/js/properties.js"></script>
+<script>
+  // 定义页面地址
+  TOOLS.definePage("template/component/properties", "server/properties", SQSERVER.listenServername);
+
+  MI.rListener("onload", function () {
+    // SQSERVER.autoColmDo();
+
+    VIEW_MODEL.newVue("ServerProperties", {
+      el: "#ServerProperties",
+      methods: {
+        toBackConsole: function () {
+          RES.redirectPage("./template/component/console.html", "server/console", SQSERVER.listenServername);
+        },
+        toUpdateProperties: function () {
+          if (!this.properties) return;
+          let obj = {
+            serverName: this.serverName,
+            properties: this.properties
+          };
+          WS.sendMsg("server/properties_update", JSON.stringify(obj));
+        },
+        toBackServerConfig: function () {
+          RES.redirectPage("./template/component/config.html", "genuser/home", this.serverName);
+        },
+        re: function () {
+          RES.redirectPage("./template/component/properties.html", "server/properties", this.serverName);
+        },
+        toUpdatePropertiesFormFile: function () {
+          WS.sendMsg("server/properties_update_reload", this.serverName);
+        },
+        findProperties: function (key) {
+          return SQSERVER.findPropertiesShow(key);
+        },
+        toDelFile: function () {
+          if (!confirm(`您确定要删除『配置文件』吗？\n\n注意：删除后无法恢复，请关闭服务器并点击『更新服务端』重载文件.`)) return;
+          WS.sendMsg("server/properties_del", this.serverName);
+          this.toBackConsole();
+        }
+      }
+    });
+  });
+
+  MI.rListener("onend", function () {
+    VIEW_MODEL["ServerProperties"] = null;
+  });
+</script>

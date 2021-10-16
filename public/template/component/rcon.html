@@ -1,0 +1,227 @@
+<div id="RconManage" class="OneContainer">
+  <div class="row">
+    <div class="col-md-12">
+
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">服务器 {{servername}} - Rcon在线管理</div>
+        <div class="PanelBody">
+          <div class="row">
+            <div class="col-sm-12 PanelItemF">
+              <div class="PanelItem" v-on:click="toBackConsole">
+                <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
+                返回到控制台
+              </div>
+              <div class="PanelItem" v-on:click="re">
+                <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+                刷新
+              </div>
+              <p>当前地图：{{MapData.current}}</p>
+              <p>预设地图：{{MapData.next}}</p>
+              <p class="color-green"><b>温馨提示：</b>本页信息每 10 秒会自动刷新数据。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">预设/更换 地图</div>
+        <div class="PanelBody">
+          <select v-model="MapCode">
+            <option value="" disabled selected hidden>请选择地图...</option>
+            <option v-for="map in MapsData" :value="map">{{map.replace(/_/gm, ' ').replace(/CAF/gm, '加拿大 - CAF')}}</option>
+          </select>
+          <input type="text" class="form-control" aria-describedby="basic-addon1" v-model="CustomMap" placeholder="自定义地图" />
+          <br />
+          <!--<input type="text" class="form-control" aria-describedby="basic-addon1" v-model="CustomMap" />-->
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="PanelItem" v-on:click="toSetNextMap">
+                <span class="glyphicon glyphicon-indent-left" aria-hidden="true"></span>
+                预设地图
+              </div>
+              <div class="PanelItem" v-on:click="toChangeMap">
+                <span class="glyphicon glyphicon-flash" aria-hidden="true"></span>
+                更换地图
+              </div>
+              <p class="color-red"><b>温馨提示：</b>服务器无玩家时，无法 预设/更换 地图。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">广播</div>
+        <div class="PanelBody">
+          <textarea class="textarea" rows="5" v-model="Broadcast"></textarea>
+          <div class="text-center PanelItem" v-on:click="toBroadcast">
+            <span class="glyphicon glyphicon-send" aria-hidden="true"></span>
+            发送
+          </div>
+        </div>
+      </div>
+
+      <div class="Panel PanelBlack">
+        <div class="PanelTitle">玩家列表 ({{SQPing.players.length|0}})</div>
+        <div class="PanelBody">
+          <table class="PropertiesList" width="100%">
+            <tr>
+              <th>昵称</th>
+              <th>得分</th>
+              <th>游戏时间</th>
+              <th style="min-width:94px;width:23%">操作</th>
+            </tr>
+            <tr v-for="obj in SQPing.players" v-if="obj">
+              <td v-text="obj.name"></td>
+              <td v-text="obj.score"></td>
+              <td v-text="obj.time"></td>
+              <td style="min-width: 94px">
+                <a href="#" v-on:click="toWarn(obj.name)">[ 警告 ]</a>
+                &nbsp;&nbsp;
+                <a href="#" v-on:click="toKick(obj.name)">[ 踢出 ]</a>
+                &nbsp;&nbsp;
+                <a href="#" v-on:click="toBan(obj.name)">[ 封禁 ]</a>
+                &nbsp;&nbsp;
+                <a href="#" v-on:click="toTeam(obj.name)">[ 更换阵营 ]</a>
+              </td>
+            </tr>
+          </table>
+          <br/>
+          <p class="color-red"><b>注意：</b>玩家操作均由玩家昵称执行，玩家重名可能会发送错误的命令！</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<style>
+  select {
+    width: 100%;
+    font-size: 18px;
+    background: #2F3136;
+  }
+</style>
+<script>
+  MI.rListener("onload", function () {
+    // SQSERVER.website.schedule = {};
+
+    // 定义页面地址
+    TOOLS.definePage("template/component/rcon", "rcon/update", SQSERVER.listenServername);
+
+    VIEW_MODEL.newVue("RconManage", {
+      el: "#RconManage",
+      data: {
+        Msg: [''],
+        MapCode: '',
+        CustomMap: '',
+        Broadcast: '',
+        MapsData: ["Albasrah_AAS_v1","Albasrah_AAS_v2","Albasrah_Insurgency_v1","Albasrah_invasion_v1","Albasrah_invasion_v2","Albasrah_RAAS_v1","Albasrah_Skirmish_v1","Albasrah_Skirmish_v2","AlBasrah_TA_v1","Albasrah_TC_v1","Albasrah_TC_v2","Belaya_AAS_v1","Belaya_AAS_v2","Belaya_Invasion_v1","Belaya_Invasion_v2","Belaya_Invasion_v3","Belaya_RAAS_v1","Belaya_RAAS_v2","Belaya_RAAS_v3","Belaya_Skirmish_v1","Belaya_TC_v1","Chora_AAS_v1","Chora_AAS_v2","Chora_AAS_v3","Chora_Insurgency_v1","Chora_Invasion_v1","Chora_Invasion_v2","Chora_RAAS_v1","Chora_RAAS_v2","Chora_Skirmish_v1","Chora_TC_v1","Fallujah_AAS_v1","Fallujah_AAS_v2","Fallujah_Insurgency_v1","Fallujah_Invasion_v1","Fallujah_Invasion_v2","Fallujah_Invasion_v3","Fallujah_RAAS_v1","Fallujah_RAAS_v2","Fallujah_RAAS_v3","Fallujah_Skirmish_v1","Fallujah_Skirmish_v2","Fallujah_TC_v1","Fallujah_TC_v2","FoolsRoad_AAS_v1","FoolsRoad_AAS_v2","FoolsRoad_Destruction_v1","FoolsRoad_Invasion_1","FoolsRoad_RAAS_v1","FoolsRoad_RAAS_v2","FoolsRoad_RAAS_v3","FoolsRoad_Skirmish_v1","FoolsRoad_Skirmish_v2","FoolsRoad_TC_v1","Gorodok_AAS_v1","Gorodok_AAS_v2","Gorodok_Destruction_v1","Gorodok_Insurgency_v1","Gorodok_Invasion_v1","Gorodok_Invasion_v2","Gorodok_RAAS_v1","Gorodok_RAAS_v2","Gorodok_RAAS_v3","Gorodok_RAAS_v4","Gorodok_RAAS_v5","Gorodok_Skirmish_v1","Gorodok_TC_v1","JensensRange_GB-MIL","JensensRange_US-RUS","JensensRange_MEA-INS","Kamdesh_AAS_v1","Kamdesh_Insurgency_v1","Kamdesh_Insurgency_v2","Kamdesh_Invasion_v1","Kamdesh_Invasion_v2","Kamdesh_Invasion_v3","Kamdesh_RAAS_v1","Kamdesh_RAAS_v2","Kamdesh_RAAS_v3","Kamdesh_RAAS_v4","Kamdesh_Skirmish_v1","Kamdesh_TC_v1","Kamdesh_TC_v2","Kohat_AAS_v1","Kohat_AAS_v2","Kohat_Insurgency_v1","Kohat_Invasion_v1","Kohat_Invasion_v2","Kohat_RAAS_v1","Kohat_RAAS_v2","Kohat_RAAS_v3","Kohat_RAAS_v4","Kohat_Skirmish_v1","Kohat_TC_v1","Kokan_AAS_v1","Kokan_Insurgency_v1","Kokan_Invasion_v1","Kokan_RAAS_v1","Kokan_RAAS_v2","Kokan_Skirmish_v1","Kokan_TC_v1","LashkarValley_AAS_v1","LashkarValley_AAS_v2","LashkarValley_Insurgency_v1","LashkarValley_Invasion_v1","LashkarValley_RAAS_v1","LashkarValley_Skirmish_v1","LashkarValley_TC_v1","LashkarValley_TC_v2","Logar_AAS_v1","Logar_AAS_v2","Logar_Insurgency_v1","Logar_RAAS_v1","Logar_Skirmish_v1","Logar_TC_v1","Mestia_AAS_V1","Mestia_Invasion_V1","Mestia_Invasion_V2","Mestia_RAAS_v1","Mestia_Skirmish_v1","Mestia_TC_v1","Mutaha_AAS_v1","Mutaha_AAS_v2","Mutaha_Invasion_v1","Mutaha_RAAS_v1","Mutaha_Skirmish_v1","Mutaha_TC_v1","Mutaha_TC_v2","Narva_AAS_v1","Narva_AAS_v2","Narva_AAS_v3","Narva_Destruction_v1","Narva_Invasion_v1","Narva_Invasion_v2","Narva_RAAS_v1","Narva_Skirmish_v1","Narva_TA_v1","Narva_TC_v1","Narva_TC_v2","Skorpo_AAS_v1","Skorpo_Invasion_v1","Skorpo_Invasion_v2","Skorpo_RAAS_v1","Skorpo_RAAS_v2","Skorpo_RAAS_v3","Skorpo_RAAS_v4","Skorpo_Skirmish_v1","Skorpo_TC_v1","Skorpo_TC_v2","Skorpo_TC_v3","Sumari_AAS_v1","Sumari_Insurgency_v1","Sumari_Invasion_v1","Sumari_RAAS_v1","Sumari_RAAS_v2","Sumari_Skirmish_v1","Sumari_TC_v1","Tallil_AAS_v1","Tallil_AAS_v2","Tallil_Invasion_v1","Tallil_Invasion_v2","Tallil_Invasion_v3","Tallil_RAAS_v1","Tallil_RAAS_v2","Tallil_RAAS_v3","Tallil_RAAS_v4","Tallil_Skirmish_v1","Tallil_Skirmish_v2","Tallil_Skirmish_v3","Tallil_Tanks_v1","Tallil_Tanks_v2","Tallil_TA_v1","Tallil_TC_v1","Tutorial_Helicopter","Tutorial_Infantry","Yehorivka_AAS_v1","Yehorivka_AAS_v2","Yehorivka_Destruction_v1","Yehorivka_Invasion_v1","Yehorivka_Invasion_v2","Yehorivka_RAAS_v1","Yehorivka_RAAS_v2","Yehorivka_RAAS_v3","Yehorivka_RAAS_v4","Yehorivka_RAAS_v5","Yehorivka_Skirmish_v1","Yehorivka_Skirmish_v2","Yehorivka_Skirmish_v3","Yehorivka_TA_v1","Yehorivka_TC_v1","Yehorivka_TC_V2","CAF_AlBasrah_Invasion_v1","CAF_AlBasrah_Invasion_v2","CAF_Belaya_AAS_v1","CAF_Belaya_RAAS_v1","CAF_Belaya_RAAS_v2","CAF_Chora_AAS_v1","CAF_Chora_RAAS_v1","CAF_Fallujah_Invasion_v1","CAF_Fallujah_RAAS_v1","CAF_Fools_Road_RAAS_v1","CAF_GooseBay_AAS_v1","CAF_GooseBay_Invasion_v1","CAF_GooseBay_Invasion_v2","CAF_GooseBay_RAAS_v1","CAF_GooseBay_Skirmish_v1","CAF_Gorodok_AAS_v1","CAF_Gorodok_Invasion_v1","CAF_Gorodok_RAAS_v1","CAF_Gorodok_RAAS_v2","CAF_Gorodok_TC_v1","CAF_JensensRange_CAF-RUS","CAF_Kamdesh_Invasion_v1","CAF_Kamdesh_RAAS_v1","CAF_Kamdesh_TC_v1","CAF_Kohat_Invasion_v1","CAF_Kokan_Valley_RAAS_v1","CAF_Lashkar_Valley_Invasion_v1","CAF_Lashkar_Valley_RAAS_v1","CAF_Lashkar_Valley_TC_v1","CAF_Logar_Valley_RAAS_v1","CAF_Manic_AAS_v1","CAF_Manic_AAS_v2","CAF_Manic_Invasion_v1","CAF_Manic_Invasion_v2","CAF_Manic_RAAS_v1","CAF_Manic_RAAS_v2","CAF_Manic_RAAS_v3","CAF_Manic_RAAS_v4","CAF_Manic_Skirmish_v1","CAF_Manic_Skirmish_v2","CAF_Manic_TC_v2","CAF_Mestia_RAAS_v1","CAF_Mutaha_AAS_v1","CAF_Mutaha_RAAS_v1","CAF_Mutaha_RAAS_v2","CAF_Narva_RAAS_v1","CAF_Skorpo_RAAS_v1","CAF_Sumari_AAS_v1","CAF_Tallil_Outskirts_RAAS_v1","CAF_Tallil_Outskirts_RAAS_v2","CAF_Yehorivka_Invasion_v1","CAF_Yehorivka_RAAS_v1","CAF_Yehorivka_TC_v2","JensensRange_FRA-RUS","FFL_Kokan_AAS_v1","FFL_Sumari_AAS_v1","FFL_Mutaha_AAS_v1","FFL_AlBasrah_RAAS_v1","FFL_AlBasrah_Skirmish_v2","FRA_Kohat_Skirmish_v1","FRA_Fallujah_Skirmish_v1","FRA_Fallujah_Skirmish_v2","FRA_Fallujah_RAAS_v1","FRA_Kohat_AAS_V2","FRA_Kohat_RAAS_V4","FRA_Chora_AAS_v1"]
+      },
+      methods: {
+        re: function () {
+          PAGE.refresh();
+        },
+        toBackConsole: function () {
+          RES.redirectPage("./template/component/console.html", "server/console", this.servername);
+        },
+        toWarn: function (Name) {
+          let Message = prompt("您确定要警告玩家 <"+Name+"> 吗？\n\n警告内容：","");
+          if (!Message) {
+            TOOLS.pushMsgWindow(`✘ 错误：警告内容 不能为空`);
+            return;
+          }
+          WS.sendMsg("rcon/warn", JSON.stringify({
+            ServerName: SQSERVER.listenServername,
+            Name: Name,
+            Message: Message
+          }));
+          TOOLS.pushMsgWindow(`『Rcon在线管理』警告玩家：${Name}，内容：${Message} - 命令已发出`);
+        },
+        toKick: function (Name) {
+          let Reason = prompt("您确定要踢出玩家 <"+Name+"> 吗？\n\n踢出原因：","");
+          if (!Reason) {
+            TOOLS.pushMsgWindow(`✘ 错误：踢出原因 不能为空`);
+            return;
+          }
+          WS.sendMsg("rcon/kick", JSON.stringify({
+            ServerName: SQSERVER.listenServername,
+            Name: Name,
+            Reason: Reason
+          }));
+          TOOLS.pushMsgWindow(`『Rcon在线管理』踢出玩家：${Name}，原因：${Reason} - 命令已发出`);
+        },
+        toBan: function (Name) {
+          let Reason = prompt("您确定要封禁玩家 <"+Name+"> 吗？\n\n封禁原因：","恶意TK");
+          if (!Reason) {
+            TOOLS.pushMsgWindow(`✘ 错误：封禁原因 不能为空`);
+            return;
+          }
+          let BanTime = prompt("1d = 1天\n3M = 3个月\n\n封禁时间：","1d");
+          if (!BanTime) {
+            TOOLS.pushMsgWindow(`✘ 错误：封禁时间 不能为空`);
+            return;
+          }
+          WS.sendMsg("rcon/ban", JSON.stringify({
+            ServerName: SQSERVER.listenServername,
+            Name: Name,
+            Time: BanTime,
+            Reason: Reason
+          }));
+          TOOLS.pushMsgWindow(`『Rcon在线管理』封禁玩家：${Name}，时间：${BanTime}，原因：${Reason} - 命令已发出`);
+        },
+        toTeam: function (Name) {
+          if (!confirm(`您确定要更换玩家『${Name}』的阵营吗？`)) return;
+          WS.sendMsg("rcon/team", JSON.stringify({
+            ServerName: SQSERVER.listenServername,
+            Name: Name
+          }));
+          TOOLS.pushMsgWindow(`『Rcon在线管理』更换玩家阵营：${Name} - 命令已发出`);
+        },
+        toChangeMap: function () {
+          let map = '';
+          if (this.CustomMap) {map=this.CustomMap;this.CustomMap=''}else map=this.MapCode;
+          if (!map) {TOOLS.pushMsgWindow(`✘ 错误：请选择要更换的地图`);return}
+          if (!confirm(`您确定要立即更换地图为『${map}』吗？`)) return;
+
+          WS.sendMsg("rcon/cl", JSON.stringify({
+            ServerName: SQSERVER.listenServername,
+            ChangeMapName: map
+          }));
+          TOOLS.pushMsgWindow(`『Rcon在线管理』更换地图：${map} - 命令已发出`);
+
+        },
+        toSetNextMap: function () {
+          let map = '';
+          if (this.CustomMap) {map=this.CustomMap;this.CustomMap=''}else map=this.MapCode;
+          if (!map) {TOOLS.pushMsgWindow(`✘ 错误：请选择要预设的地图`);return}
+          if (!confirm(`您确定要预设地图为『${map}』吗？`)) return;
+
+          WS.sendMsg("rcon/snl", JSON.stringify({
+            ServerName: SQSERVER.listenServername,
+            SetNextMapName: map
+          }));
+          TOOLS.pushMsgWindow(`『Rcon在线管理』预设地图：${map} - 命令已发出`);
+          PAGE.refresh();
+        },
+        toBroadcast: function () {
+          if (!this.Broadcast) {
+            TOOLS.pushMsgWindow(`✘ 错误：广播内容 不能为空`);
+            return;
+          }
+          WS.sendMsg("rcon/broadcast", JSON.stringify({
+            ServerName: SQSERVER.listenServername,
+            Message: this.Broadcast
+          }));
+          TOOLS.pushMsgWindow(`『Rcon在线管理』广播内容：${this.Broadcast} - 命令已发出`);
+        }
+      }
+    });
+  });
+
+  MI.rListener("onend", function () {
+    WS.sendMsg("rcon/end", SQSERVER.listenServername);
+  });
+
+  setInterval(function () {
+    WS.sendMsg("rcon/update", SQSERVER.listenServername);
+  },1000 * 10)
+</script>

@@ -1,0 +1,191 @@
+<div id="CreateServerView" class="OneContainer">
+  <div class="row">
+    <div class="col-lg-12 col-sm-12">
+      <div class="Panel PanelGreen">
+        <div class="PanelTitle">创建服务器</div>
+        <div class="PanelBody">
+          <p>您可以创建一个新的服务器，默认所有用户不可操作，只限于管理员一人可以控制。</p>
+          <p>不过创建一个服务器您可以需要完善以下信息：</p>
+          <div class="row" style="padding-top: 10px; padding-bottom: 30px">
+
+            <div class="col-md-6">
+
+              <div class="input-group input-group-sm">
+                <span class="input-group-addon">服务器名字</span>
+                <input type="text" class="form-control" v-model="name" placeholder="[必填(仅限字母数字下划线组合)]" />
+              </div>
+
+              <div class="row">
+
+                <div class="col-sm-6">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-addon"> 服务器类型 </span>
+                    <select v-model="type" class="form-control">
+                      <option value="pure">纯净</option>
+                      <option value="mod">模组</option>
+                    </select>
+                  </div>
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-addon"> 到期限制 </span>
+                    <input type="text" class="form-control" v-model="timeLimitDate" placeholder="[未设定 如 2018/10/01 2020/01/12]" />
+                  </div>
+                </div>
+
+                <div class="col-sm-6">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-addon"> TickRate限制 </span>
+                    <input type="number" class="form-control" v-model="TickRate" placeholder="[无限制]" />
+                  </div>
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-addon"> 用户QQ </span>
+                    <input type="number" class="form-control" v-model="UserQQ" placeholder="[未设置]" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <div class="col-md-6">
+              <div class="input-group input-group-sm">
+                <span class="input-group-addon">启动附加参数</span>
+                <input type="text" class="form-control" v-model="addCmd" placeholder="[无附加参数]" />
+              </div>
+              <div class="input-group input-group-sm">
+                <span class="input-group-addon">服务端文件根目录</span>
+                <input type="text" class="form-control" v-model="cwd" :placeholder="serverCwd" oninput="value=value.replace(/\\/g,'/')" />
+              </div>
+
+              <div class="row">
+                <div class="col-sm-6">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-addon"> 游戏端口 </span>
+                    <input type="number" class="form-control" v-model="GamePort" placeholder="[缺省值]" />
+                  </div>
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-addon"> 查询端口 </span>
+                    <input type="number" class="form-control" v-model="QueryPort" placeholder="[缺省值]" />
+                  </div>
+                </div>
+
+                <div class="col-sm-6">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-addon"> 人数限制 </span>
+                    <input type="number" class="form-control" v-model="MaxPlayer" placeholder="[无限制]" />
+                  </div>
+                  <div class="input-group input-group-sm">
+                  <span class="input-group-addon"> 模组编号 </span>
+                  <input v-bind:disabled="isMod" type="number" class="form-control" v-model="ModID" placeholder="[不使用模组]" />
+                </div>
+              </div>
+
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-12">
+              <p>到目前为止，我们创建一个服务器只需要这些信息足以，您可以在创建之后修改相关配置；</p>
+              <p>或者，如果您想的话，可以分配给其他用户使用。</p>
+              <div class="Line"></div>
+              <div style="float: right; margin-top: 20px">
+                <button class="btn btn-primary" v-on:click="toCreateServer()">创建服务器</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--
+  <div class="row">
+    <div class="col-md-6">
+      <div class="Panel PanelRed">
+        <div class="PanelTitle">创建服务器相关协议</div>
+        <div class="PanelBody">
+          <p>您使用本控制面板创建 Squad 之后，请遵循您所使用的那个服务端的相关协议;</p>
+          <p>面板不会自动同意Squad EULA（最终用户协议），请首次启动后手动修改eula.txt文件更改。</p>
+          <p>尊重版权，请支持 Squad 正版。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  -->
+</div>
+
+<script>
+  MI.rListener("onload", function () {
+    // 定义页面地址
+    TOOLS.definePage("template/component/newserver", "userset/ServerDir", "");
+
+    VIEW_MODEL.newVue("CreateServerView", {
+      el: "#CreateServerView",
+      data: {
+        name: 'Server_',
+        type: 'pure',
+        UserQQ: '',
+        addCmd: '',
+        cwd: '',
+        GamePort: randomFrom(10000,20000),
+        QueryPort: randomFrom(20001,30000),
+        MaxPlayer: '',
+        ModID: '',
+        isMod: true,
+        timeLimitDate: getTimeLimitDate(),
+        TickRate: 35
+      },
+      methods: {
+        toCreateServer: function () {
+          let addCmdList = this.addCmd.split(" ");
+          if (!TOOLS.isStdText(this.name)) {
+            TOOLS.pushMsgWindow("服务器名字不合法！仅限字母数字下划线！");
+            return;
+          }
+          let obj = {
+            addCmd: addCmdList,
+            serverName: this.name,
+            type: this.type,
+            cwd: this.cwd,
+            UserQQ: this.UserQQ,
+            GamePort: this.GamePort,
+            QueryPort: this.QueryPort,
+            MaxPlayer: Number(this.MaxPlayer),
+            ModID: Number(this.ModID),
+            timeLimitDate: this.timeLimitDate,
+            TickRate: this.TickRate
+          };
+          WS.sendMsg("server/create", JSON.stringify(obj));
+          RES.redirectPage("./template/server.html", "server/view");
+        }
+      },
+      watch: {
+        type: function () {
+          if (this.type==='pure') {
+            this.isMod = true;
+            this.ModID = '';
+          } else {
+            this.isMod = false;
+          }
+        }
+      },
+      computed: {
+        serverCwd: function () {
+          if (this.cwd == '') return this.ServerDir + this.name;
+          return this.cwd;
+        }
+      }
+    });
+  });
+
+  MI.rListener("onend", function () {});
+
+  function randomFrom(lowerValue,upperValue) {
+    return Math.floor(Math.random() * (upperValue - lowerValue + 1) + lowerValue);
+  }
+  function getTimeLimitDate() {
+    let date = new Date();
+    let month = date.getMonth() + 2;
+    let strDate = date.getDate();
+    if (month >= 1 && month <= 9) month = '0' + month;
+    if (strDate >= 0 && strDate <= 9) strDate = '0' + strDate;
+    return date.getFullYear() + '/' + month + '/' + strDate;
+  }
+</script>
