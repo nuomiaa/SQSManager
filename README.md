@@ -38,3 +38,9 @@
 
 > 此文件不会与 github 版本冲突，git pull 更新时也不会自动覆盖。
 <br />
+
+
+赞助我
+-----------
+![1](https://user-images.githubusercontent.com/92624354/137582203-d8d1537e-7554-4b56-b622-61d9d3e6c3e6.png)
+![2](https://user-images.githubusercontent.com/92624354/137582198-dcabcb6c-af4a-4896-821e-738c0aa79237.png)
