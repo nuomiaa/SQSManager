@@ -17,6 +17,13 @@
       link: "./template/gen_about.html",
       api: null,
       select: false
+    },
+    {
+      class: "glyphicon-book",
+      name: "GitHub开源",
+      link: "./template/github.html",
+      api: null,
+      select: false
     }
   ];
 
@@ -48,6 +55,13 @@
       class: "glyphicon-floppy-open",
       name: "服务",
       link: "./template/feelback.html",
+      api: null,
+      select: false
+    },
+    {
+      class: "glyphicon-book",
+      name: "GitHub开源",
+      link: "./template/github.html",
       api: null,
       select: false
     }

@@ -3,7 +3,6 @@ const { Rcon } = require("rcon-client");
 module.exports = class {
     constructor(Port, Password) {
         this.info = {host: "127.0.0.1", port: Port, password: Password};
-        // this.info = {host: "1.server.33m.me", port: Port, password: Password};
     }
     async ConnectRcon() {
         this.rcon = await Rcon.connect(this.info);

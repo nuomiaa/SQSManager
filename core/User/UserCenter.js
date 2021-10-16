@@ -89,6 +89,12 @@ class UserCenter {
         falsecb && falsecb();
         return false;
       }
+
+      // 一般模式 供可信任内部代码使用，无需要md5加密传值方式验证。
+      if (notSafeLogin && loginUser.isPassword(password)) {
+        truecb && truecb(loginUser);
+        return true;
+      }
     }
     falsecb && falsecb();
     return false;
