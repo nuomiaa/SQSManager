@@ -101,7 +101,7 @@
                     staticStyle: {
                         color: "#ffffff"
                     }
-                }, [e._v("[虚银] SQ面板服务器 - 文件管理")]), n("span", {
+                }, [e._v("[翠星] SQ面板服务器 - 文件管理")]), n("span", {
                     staticClass: "task-info",
                     domProps: {
                         textContent: e._s(e.extpressQueueInfo)

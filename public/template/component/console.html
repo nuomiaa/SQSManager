@@ -61,10 +61,6 @@
               关闭服务器
             </div>
           </transition>
-          <div class="PanelItem" v-on:click="if(confirm('您确定要 [重启] 服务器吗？'))toCommand('__restart__')" v-show="run">
-            <span class="glyphicon glyphicon-refresh" aria-hidden="true"> </span>
-            重启服务器
-          </div>
           <div class="PanelItem" v-on:click="toCommand('__update__')" v-show="!run">
             <span class="glyphicon glyphicon-cloud-download" aria-hidden="true"> </span>
             更新服务端
