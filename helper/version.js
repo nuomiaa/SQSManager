@@ -9,7 +9,7 @@ const verisonA = "8.6.16"; //发行版本
 
 const verisonB = "No.20201219-01"; //版本批次
 
-const verisonC = "1.3.7"; //SQ面板版本
+const verisonC = "1.3.8"; //SQ面板版本
 
 let info = [os.type(), os.arch(), os.hostname(), os.release()].join(" ");
 
