@@ -4,9 +4,12 @@ const permission = require("./Permission");
 // 通过 KEY 来获取相对的用户身份
 function getUser(key = "") {
   key = key.trim();
+  if (!key) return null; // 漏洞修复
   const userList = userCenter.userList;
   for (const userName in userList) {
-    if (userList[userName].dataModel.apikey === key) {
+    const userApiKey = userList[userName].dataModel.apikey; // 漏洞修复
+    if (!userApiKey) continue; // 漏洞修复
+    if (userApiKey === key) { // 漏洞修复
       return userList[userName];
     }
   }
