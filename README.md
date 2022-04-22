@@ -1,7 +1,7 @@
 # SQSManager
 简单，易用，多实例，轻量级的 Squad Server 控制面板 
 
-本项目基于 [MCSManager](https://github.com/Suwings/MCSManager) 改写
+本项目基于 [MCSManager](https://github.com/Suwings/MCSManager) 改写，由 nuomiaa 二次开发。
 
 
 <br />
