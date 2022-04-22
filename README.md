@@ -16,7 +16,7 @@ ____/ // /_/ /____/ /_  /  / / / /_/ /_  / / / /_/ /_  /_/ //  __/  /
 这是一款可以管理多个 Squad Server 服务端（支持群组端）的 Web 管理面板，并且可以分配多个子账号来分别管理不同的 Squad Server 服务端，支持绝大部分主流的服务端，甚至是其他非 Squad Server 的程序。
 
 
-项目基于 [MCSManager](https://github.com/MCSManager/MCSManager) 8.6 版开发，由 [nuomiaa](https://github.com/nuomiaa) 开发。
+项目基于 [MCSManager](https://github.com/MCSManager/MCSManager) 8.6 版开发，由 [nuomiaa](https://github.com/nuomiaa) 开发与维护。
 
 <br />
 
