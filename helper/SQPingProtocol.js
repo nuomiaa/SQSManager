@@ -14,8 +14,8 @@ function PingSQServer(port, callback) {
 
     for (let p in state.players){
       if (!state.players[p].name || state.players[p].name===undefined) continue;
-      if (state.players[p].score===undefined) state.players[i].score=0;
-      if (state.players[p].time===undefined) state.players[i].time=0;
+      if (state.players[p].score===undefined) state.players[p].score=0;
+      if (state.players[p].time===undefined) state.players[p].time=0;
       state.players[p].time=SecondToTime(parseInt(state.players[p].time));
     }
 
