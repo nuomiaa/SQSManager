@@ -1,27 +1,35 @@
 const Gamedig = require('gamedig');
 
 function PingSQServer(port, callback) {
-  Gamedig.query({type: 'squad', host: '127.0.0.1', port: port}).then((state) => {
-    // console.log(state);
+  Gamedig.query({ type: 'squad', host: '127.0.0.1', port: port }).then((state) => {
+    console.log(state);
     let on = state.players.length;
     let max = state.maxplayers;
-    if (on > max){
-      let line = on-max;
-      on = max+'(+'+line+')';
+    if (on > max) {
+      let line = on - max;
+      on = max + '(+' + line + ')';
     }
     state.current_players = on;
     state.max_players = max;
 
-    for (let p in state.players){
-      if (!state.players[p].name || state.players[p].name===undefined) continue;
-      if (state.players[p].score===undefined) state.players[p].score=0;
-      if (state.players[p].time===undefined) state.players[p].time=0;
-      state.players[p].time=SecondToTime(parseInt(state.players[p].time));
+    for (let p in state.players) {
+      if (!state.players[p].name || state.players[p].name === undefined) continue;
+      if (state.players[p].raw === undefined || state.players[p].raw.score === undefined) {
+        state.players[p].score = 0
+      } else {
+        state.players[p].score = state.players[p].raw.score;
+      }
+      if (state.players[p].raw === undefined || state.players[p].raw.time === undefined) {
+        state.players[p].time = 0;
+      } else {
+        state.players[p].time = state.players[p].raw.time;
+      }
+      state.players[p].time = SecondToTime(parseInt(state.players[p].time));
     }
 
-    if (state.raw.rules.LicenseId_i>100 && state.raw.rules.LicenseSig1_s && state.raw.rules.LicenseSig2_s && state.raw.rules.LicenseSig3_s){
+    if (state.raw.rules.LicenseId_i > 100 && state.raw.rules.LicenseSig1_s && state.raw.rules.LicenseSig2_s && state.raw.rules.LicenseSig3_s) {
       state.License = true;
-    }else {
+    } else {
       state.License = false;
     }
 
@@ -93,7 +101,7 @@ function SecondToTime(Second) {
   let theTime = Second;//秒
   let middle = 0;//分
   let hour = 0;//小时
-  if (theTime > 59){
+  if (theTime > 59) {
     middle = parseInt(theTime / 60);
     theTime = parseInt(theTime % 60);
   }
